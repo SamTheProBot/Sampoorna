@@ -4,16 +4,28 @@ pragma solidity ^0.8.26;
 error NotEnoughFunds(); 
 
 contract Manager {
+
+    enum Fixed_Deposit_Term {
+        LONG,
+        MID,
+        SHORT,
+        NONE
+    }
+
     struct User {
         address Addr;
         bool Provident_Fund;
-        bool Fixed_Deposit;
+        Fixed_Deposit_Term Fixed_Deposit;
         bool Health_Insurance;
     }
 
-    uint256 public constant QUOTA_AMOUNT = 1 * 1e16;
+    uint256 public QUOTA_AMOUNT = 1 * 1e16;
     uint256 private constant INITIAL_AMOUNT = 1 * 1e15;
     uint256 private constant MIN_DONATION_VAL = 1 * 1e16; 
+
+    uint256 private constant PROVIDENT_FUND_DEDUCTION = 2.5 * 1e15;
+    uint256 private constant FIXED_DEPOSIT_DEDUCTION = 2.5 * 1e15;
+    uint256 private constant HEALTH_INSURANCE_DEDUCTION = 4 * 1e15;
 
     address private immutable i_owner;
     address[] public UserArray;
@@ -30,11 +42,10 @@ contract Manager {
     }
     
     function AddUser() external initialFund {
-       // add user
         UserMapping[msg.sender] = User({
             Addr: msg.sender,
             Provident_Fund: false,
-            Fixed_Deposit: false,
+            Fixed_Deposit: Fixed_Deposit_Term.NONE,
             Health_Insurance: false
         });
         UserArray.push(msg.sender);
@@ -45,9 +56,9 @@ contract Manager {
         UserMapping[msg.sender].Provident_Fund = true;
     }
     
-    function Apply_Fixed_Deposit() public{
-        require(UserMapping[msg.sender].Fixed_Deposit == false, "fixed fund already approved");
-        UserMapping[msg.sender].Fixed_Deposit = true;
+    function Apply_Fixed_Deposit(Fixed_Deposit_Term term) public{
+        require(UserMapping[msg.sender].Fixed_Deposit == Fixed_Deposit_Term.NONE, "fixed fund already approved");
+        UserMapping[msg.sender].Fixed_Deposit = term;
     }
     
     function Apply_Health_Insurance() public{
@@ -59,7 +70,7 @@ contract Manager {
         return UserMapping[msg.sender].Provident_Fund;
     }
     
-    function Check_Fixed_Deposit() public view returns(bool){
+    function Check_Fixed_Deposit() public view returns(Fixed_Deposit_Term){
         return UserMapping[msg.sender].Fixed_Deposit;
     }
     
@@ -73,8 +84,10 @@ contract Manager {
     }
     
     function Cancel_Fixed_Deposit() public{
-        require(UserMapping[msg.sender].Fixed_Deposit == true, "approve first to cancel");
-        UserMapping[msg.sender].Fixed_Deposit = false;
+        require(UserMapping[msg.sender].Fixed_Deposit == Fixed_Deposit_Term.LONG ||
+                UserMapping[msg.sender].Fixed_Deposit == Fixed_Deposit_Term.MID ||
+                UserMapping[msg.sender].Fixed_Deposit == Fixed_Deposit_Term.SHORT, "approve first to cancel");
+        UserMapping[msg.sender].Fixed_Deposit = Fixed_Deposit_Term.NONE;
     }
     
     function Cancel_Health_Insurance() public{
@@ -84,42 +97,71 @@ contract Manager {
 
     
     function AddBalance() external payable onlyOwner {
-        // add balance to contract as Goverment
         require(msg.value > 0,"add more than 0 sir");
     }
 
+    function ChangeQuota(uint256 NEW_QUOTA_FRACTION ) private onlyOwner {
+        uint256 NEW_QUOTA = NEW_QUOTA_FRACTION * 1e15;
+        require(NEW_QUOTA > 0, "it must be grater than 0");
+        QUOTA_AMOUNT = NEW_QUOTA;
+    }
+
     function FundRaise() external payable {
-        // to recive the donations from the doner
         require(msg.value > MIN_DONATION_VAL, "donation under funded");
         Funders_Contribution[msg.sender] += msg.value;
-        Funders.push(msg.sender);
+        if (Funders_Contribution[msg.sender] == msg.value) {
+            Funders.push(msg.sender);
+        }
         emit e_FunderLog(msg.sender, msg.value);
     }
 
+    function CalculateQuotaDeduction(address user) public view returns (uint256) {
+        uint256 amount = 0;
+        if (UserMapping[user].Provident_Fund) {
+            amount += PROVIDENT_FUND_DEDUCTION;
+        }
+        if (UserMapping[user].Fixed_Deposit != Fixed_Deposit_Term.NONE) {
+            amount += FIXED_DEPOSIT_DEDUCTION;
+        }
+        if (UserMapping[user].Health_Insurance) {
+            amount += HEALTH_INSURANCE_DEDUCTION;
+        }
+
+        return amount;
+    }
+
+    function GetRemainingQuota(address user) public view returns (uint256) {
+        uint256 totalAmount = CalculateQuotaDeduction(user);
+        if (totalAmount >= QUOTA_AMOUNT) {
+            return 0;
+        }
+        return QUOTA_AMOUNT - totalAmount;
+    }
+
     function Distribute() external payable {
-        // distribute funds among public
-        // can be automated using chainlink
         require(address(this).balance >= UserArray.length * QUOTA_AMOUNT, "not enought fund to distribute le popat");
 
         for (uint i = 0; i < UserArray.length; i++) {
             address userAdd = UserArray[i];
-            payable(userAdd).transfer(QUOTA_AMOUNT);
+            uint256 remaingAmount = GetRemainingQuota(userAdd);
+
+            (bool success, ) = payable(userAdd).call{value: remaingAmount}("");
+            require(success, "Transfer failed");
             emit e_Reciver(userAdd);
         }
     }
    
     function WithDrawl() external payable onlyOwner{
-        // to withdrawl all the ETH in the end of hackthon
-        payable(msg.sender).transfer(address(this).balance);
+         require(address(this).balance > 0, "nothing to withdraw");
+        (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+        require(success, "Withdrawal failed");
     }
 
     modifier initialFund(){
-        // provide initail funds to user
-        require(UserMapping[msg.sender].Provident_Fund == false &&
-                UserMapping[msg.sender].Fixed_Deposit == false &&
-                UserMapping[msg.sender].Health_Insurance == false, "user already exist");
+        require(UserMapping[msg.sender].Addr != msg.sender, "user already exist");
         require(address(this).balance >= INITIAL_AMOUNT, "not enought funds");
-        payable(msg.sender).transfer(INITIAL_AMOUNT);
+         (bool success, ) = payable(msg.sender).call{value: INITIAL_AMOUNT}("");
+        require(success, "Initial fund transfer failed");
     _;
     }
 
