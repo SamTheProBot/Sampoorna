@@ -5,7 +5,6 @@ import helmet from 'helmet';
 import cors from 'cors';
 import RateLimit from './src/middleware/ratelimiter';
 import ExpressMongoSanitize from 'express-mongo-sanitize';
-import cookieParser from 'cookie-parser';
 import CSP from './src/middleware/csp';
 import { authRoute } from './src/router/auth';
 dotenv.config();
@@ -21,7 +20,6 @@ app.use(
 );
 app.use(ExpressMongoSanitize());
 app.use(express.json());
-app.use(cookieParser());
 app.use(CSP);
 app.use(helmet());
 
@@ -38,7 +36,7 @@ const Start = () => {
         useUnifiedTopology: true,
       };
     } catch (e) {
-      console.error(e);
+      console.error(`something went wrong, ${e}`);
     }
     console.log(`[server]: Server is running at http://localhost:${port}`);
   });
