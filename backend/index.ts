@@ -5,7 +5,6 @@ import helmet from 'helmet';
 import cors from 'cors';
 import RateLimit from './src/middleware/ratelimiter';
 import ExpressMongoSanitize from 'express-mongo-sanitize';
-import CSP from './src/middleware/csp';
 import { authRoute } from './src/router/auth';
 dotenv.config();
 
@@ -20,7 +19,6 @@ app.use(
 );
 app.use(ExpressMongoSanitize());
 app.use(express.json());
-app.use(CSP);
 app.use(helmet());
 
 app.use('/api/v1/auth/', authRoute);

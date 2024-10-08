@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-const UserSchema = new Schema({
+const User = new Schema({
   name: {
     type: String,
     required: [true, `please provide name`],
@@ -33,10 +33,9 @@ const UserSchema = new Schema({
       type: String,
       required: [true, `please provide accountNumber`]
     },
-    accountType: {
+    Ifsc: {
       type: String,
-      required: [true, `please provide account type`],
-      enum: ['saving', 'current', 'jan-dhan']
+      required: [true, `please provide your ifsc code`],
     }
   },
   abhaNumber: {
@@ -45,4 +44,4 @@ const UserSchema = new Schema({
   },
 })
 
-export default model('UserSchema', UserSchema);
+export default model('User', User);

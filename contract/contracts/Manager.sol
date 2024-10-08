@@ -4,10 +4,16 @@ pragma solidity ^0.8.26;
 error NotEnoughFunds();
 
 contract Manager {
+
     enum Fixed_Deposit_Term {
         LONG,
         MID,
         SHORT,
+        NONE
+    }
+    enum Health_Insurance_Term {
+        ACTIVE,
+        DEDUCED,
         NONE
     }
 
@@ -15,7 +21,7 @@ contract Manager {
         address Addr;
         bool Provident_Fund;
         Fixed_Deposit_Term Fixed_Deposit;
-        bool Health_Insurance;
+        Health_Insurance_Term Health_Insurance;
     }
 
     uint256 public QUOTA_AMOUNT = 1 * 1e16;
@@ -46,7 +52,7 @@ contract Manager {
             Addr: msg.sender,
             Provident_Fund: false,
             Fixed_Deposit: Fixed_Deposit_Term.NONE,
-            Health_Insurance: false
+            Health_Insurance: Health_Insurance_Term.NONE
         });
         UserArray.push(msg.sender);
     }
@@ -60,26 +66,37 @@ contract Manager {
         emit e_Service(msg.sender, "provident_fund", PROVIDENT_FUND_DEDUCTION);
     }
 
-    function Apply_Fixed_Deposit(Fixed_Deposit_Term term) public {
+    function Apply_Fixed_Deposit(uint256 term) public {
         require(
-            UserMapping[msg.sender].Fixed_Deposit == Fixed_Deposit_Term.NONE,
-            "fixed fund already approved"
+            UserMapping[msg.sender].Fixed_Deposit == Fixed_Deposit_Term.NONE && term == 1 && term == 2 && term == 3,
+            "fixed fund already approved or wrong term choose"
         );
-        UserMapping[msg.sender].Fixed_Deposit = term;
+        if(term == 1){
+            UserMapping[msg.sender].Fixed_Deposit = Fixed_Deposit_Term.SHORT;
+        }else if(term == 2){
+            UserMapping[msg.sender].Fixed_Deposit = Fixed_Deposit_Term.MID;
+        }else if(term == 3){
+            UserMapping[msg.sender].Fixed_Deposit = Fixed_Deposit_Term.LONG;      
+        }
         emit e_Service(msg.sender, "fixed_deposit", FIXED_DEPOSIT_DEDUCTION);
     }
 
     function Apply_Health_Insurance() public {
         require(
-            UserMapping[msg.sender].Health_Insurance == false,
+            UserMapping[msg.sender].Health_Insurance == Health_Insurance_Term.NONE,
             "insurence already approved"
         );
-        UserMapping[msg.sender].Health_Insurance = true;
+        UserMapping[msg.sender].Health_Insurance = Health_Insurance_Term.ACTIVE;
         emit e_Service(
             msg.sender,
             "health_insurence",
             HEALTH_INSURANCE_DEDUCTION
         );
+    }
+
+    function Clame_Health_Insurance() public {
+        require(UserMapping[msg.sender].Health_Insurance == Health_Insurance_Term.ACTIVE);
+            UserMapping[msg.sender].Health_Insurance = Health_Insurance_Term.DEDUCED;        
     }
 
     function Check_Provident_Fund() public view returns (bool) {
@@ -90,7 +107,7 @@ contract Manager {
         return UserMapping[msg.sender].Fixed_Deposit;
     }
 
-    function Check_Health_Insurance() public view returns (bool) {
+    function Check_Health_Insurance() public view returns (Health_Insurance_Term) {
         return UserMapping[msg.sender].Health_Insurance;
     }
 
@@ -118,10 +135,10 @@ contract Manager {
 
     function Cancel_Health_Insurance() public {
         require(
-            UserMapping[msg.sender].Health_Insurance == true,
+            UserMapping[msg.sender].Health_Insurance == Health_Insurance_Term.ACTIVE,
             "approve first to cancel"
         );
-        UserMapping[msg.sender].Health_Insurance = false;
+        UserMapping[msg.sender].Health_Insurance = Health_Insurance_Term.NONE;
         emit e_Service(msg.sender, "cancel_health_insurence", 0);
     }
 
@@ -154,7 +171,7 @@ contract Manager {
         if (UserMapping[user].Fixed_Deposit != Fixed_Deposit_Term.NONE) {
             amount += FIXED_DEPOSIT_DEDUCTION;
         }
-        if (UserMapping[user].Health_Insurance) {
+        if (UserMapping[user].Health_Insurance != Health_Insurance_Term.NONE) {
             amount += HEALTH_INSURANCE_DEDUCTION;
         }
 
