@@ -1,4 +1,6 @@
+import { request } from 'axios';
 import { Schema, model } from 'mongoose';
+import { type } from 'os';
 
 const User = new Schema({
   name: {
@@ -15,6 +17,10 @@ const User = new Schema({
       /^(\d{4}\s\d{4}\s\d{4})$/,
       `please provide correct aadhar`
     ],
+  },
+  age: {
+    type: Number,
+    required: [true, `please provide you number`]
   },
   wallet: {
     privateKey: {

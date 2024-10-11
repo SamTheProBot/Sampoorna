@@ -1,6 +1,14 @@
 import { Schema, model } from 'mongoose';
 
 const Logs = new Schema({
+  fromName: {
+    type: String,
+    default: '',
+  },
+  toName: {
+    type: String,
+    default: '',
+  },
   eventType: {
     type: String,
     required: true,
