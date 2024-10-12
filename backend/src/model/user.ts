@@ -34,7 +34,7 @@ const User = new Schema({
       type: String,
       required: [true, `please provide accountNumber`]
     },
-    Ifsc: {
+    ifsc: {
       type: String,
       required: [true, `please provide your ifsc code`],
     }

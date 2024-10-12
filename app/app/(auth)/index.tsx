@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { BackGroundImage } from '@/components/BackGround';
 import { StyleSheet } from 'react-native';
@@ -8,17 +9,24 @@ import { HyperLink } from '@/components/Navigate';
 import { TransThemedView } from '@/components/ThemedView';
 import { ThemedButton } from '@/components/Button';
 import { useState } from 'react';
-
+import { EndPoint } from '@/constants/apiEndPoint';
+import { saveDataSecure } from '@/hooks/storage';
 
 export default function Login() {
   const route = useRouter();
   const [name, setName] = useState('');
   const [aadhar, setAadhar] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (name && aadhar) {
-      console.log('Login successful');
-      route.replace('/home');
+      try{
+        const response = await axios.post( `${EndPoint}/auth/login` ,{name, aadhar});
+      saveDataSecure({key:'access_token', value: response.data.access_token});
+        route.replace('/home');
+      }
+      catch(e){
+        console.log(`server error ${e}`)
+      }
     } else {
       console.log('provide essintial credntion')
     }

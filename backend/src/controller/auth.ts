@@ -8,7 +8,7 @@ dotenv.config();
 
 
 export const UserSignup = async (req: Request, res: Response) => {
-  const { name, aadhar, abhaNumber, bankDetails } = req.body;
+  const { name, aadhar, abhaNumber, bankDetails, age } = req.body;
 
     if (!name || !aadhar || !abhaNumber || !bankDetails) {
      return res.status(400).json({ message: `please provide all the information` });
@@ -18,12 +18,12 @@ export const UserSignup = async (req: Request, res: Response) => {
   try {
     
     const wallet = ethers.Wallet.createRandom();
-    
 
     const user = await User.create({
       name: name,
       aadhar: aadhar,
       abhaNumber: abhaNumber,
+      age: age,
       wallet: {
         address: wallet.address,
         privateKey: encrypt(wallet.privateKey),
@@ -31,7 +31,7 @@ export const UserSignup = async (req: Request, res: Response) => {
       bankDetails: {
         bankName: bankDetails.bankName,
         accountNumber: bankDetails.accountNumber,
-        Ifsc: bankDetails.Ifsc,
+        ifsc: bankDetails.ifsc,
       }
     });
 

@@ -25,7 +25,7 @@ app.use('/api/v1/auth/', authRoute);
 app.use('/api/', RateLimit);
 
 const Start = () => {
-  app.listen(port, async () => {
+  app.listen(parseInt(port),`0.0.0.0` ,async () => {
     try {
       await mongoose.connect(process.env.MONGODB_URI),
       {

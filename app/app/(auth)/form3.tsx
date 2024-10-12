@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
 import { Text, StyleSheet, View, Keyboard } from 'react-native';
 import { BackGroundImage } from '@/components/BackGround';
@@ -7,6 +8,8 @@ import { ThemedButton } from '@/components/Button';
 import { SignupContext } from './_layout';
 import { Navigate } from '@/components/Navigate';
 import { useRouter } from 'expo-router';
+import { EndPoint } from '@/constants/apiEndPoint';
+import { saveDataSecure } from '@/hooks/storage';
 
 export default function Sign3() {
   const router = useRouter();
@@ -28,24 +31,18 @@ export default function Sign3() {
   }, []);
 
   const handleSubmit = async () => {
-    router.replace('/home')
-    //  if (signupData.bankDetails.bankName && signupData.bankDetails.accountNumber && signupData.bankDetails.ifsc) {
-    //     console.log('Bank Details Submitted');
-    //
-    //      try {
-    //        const response = await fetch('https://example.com/api/signup', {
-    //          method: 'POST',
-    //          headers: { 'Content-Type': 'application/json' },
-    //          body: JSON.stringify(signupData),
-    //        });
-    //        const result = await response.json();
-    //        console.log(result);
-    //      } catch (error) {
-    //        console.error('Error submitting signup data:', error);
-    //      }
-    //    } else {
-    //      console.log('Please fill out all fields');
-    //   }
+    if (signupData.bankDetails.bankName && signupData.bankDetails.accountNumber && signupData.bankDetails.ifsc) {
+
+      try {
+        const response = await axios.post(`${EndPoint}/auth/signup`, signupData);
+        saveDataSecure({key:'access_token', value: response.data.access_token});
+        router.replace('/home')
+         } catch (error) {
+           console.error('Error submitting signup data:', error);
+         }
+       } else {
+         console.log('Please fill out all fields');
+      }
   };
 
   return (
