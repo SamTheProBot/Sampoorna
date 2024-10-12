@@ -1,6 +1,5 @@
 import { request } from 'axios';
 import { Schema, model } from 'mongoose';
-import { type } from 'os';
 
 const User = new Schema({
   name: {
@@ -10,13 +9,9 @@ const User = new Schema({
     maxlength: 50,
   },
   aadhar: {
-    type: Number,
+    type: String,
     unique: true,
     required: [true, `please provide addhar number`],
-    match: [
-      /^(\d{4}\s\d{4}\s\d{4})$/,
-      `please provide correct aadhar`
-    ],
   },
   age: {
     type: Number,
@@ -45,7 +40,7 @@ const User = new Schema({
     }
   },
   abhaNumber: {
-    type: Number,
+    type: String,
     default: 0,
   },
 })

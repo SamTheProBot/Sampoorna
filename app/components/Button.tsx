@@ -3,11 +3,12 @@ import { TouchableOpacity, Text, StyleSheet } from "react-native";
 interface ButtonProp {
   onPress: () => void;
   placeholder: string;
+  style?: any;
 }
 
-export function ThemedButton({ onPress, placeholder }: ButtonProp) {
+export function ThemedButton({ onPress, placeholder, style }: ButtonProp) {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
       <Text style={styles.buttonText}>{placeholder}</Text>
     </TouchableOpacity>
   );
@@ -17,7 +18,7 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 10,
     width: '80%',
-    backgroundColor: '#FF6347',
+    backgroundColor: 'darkorange',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 18,

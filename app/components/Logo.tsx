@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     fontWeight: 'bold',
     fontSize: 26,
-    color: '#FF6347',
+    color: 'darkorange',
     marginBottom: 8,
   }
 })

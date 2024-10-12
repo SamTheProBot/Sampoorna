@@ -4,7 +4,6 @@ pragma solidity ^0.8.26;
 error NotEnoughFunds();
 
 contract Manager {
-
     enum Fixed_Deposit_Term {
         LONG,
         MID,
@@ -68,22 +67,26 @@ contract Manager {
 
     function Apply_Fixed_Deposit(uint256 term) public {
         require(
-            UserMapping[msg.sender].Fixed_Deposit == Fixed_Deposit_Term.NONE && term == 1 && term == 2 && term == 3,
+            UserMapping[msg.sender].Fixed_Deposit == Fixed_Deposit_Term.NONE &&
+                term == 1 &&
+                term == 2 &&
+                term == 3,
             "fixed fund already approved or wrong term choose"
         );
-        if(term == 1){
+        if (term == 1) {
             UserMapping[msg.sender].Fixed_Deposit = Fixed_Deposit_Term.SHORT;
-        }else if(term == 2){
+        } else if (term == 2) {
             UserMapping[msg.sender].Fixed_Deposit = Fixed_Deposit_Term.MID;
-        }else if(term == 3){
-            UserMapping[msg.sender].Fixed_Deposit = Fixed_Deposit_Term.LONG;      
+        } else if (term == 3) {
+            UserMapping[msg.sender].Fixed_Deposit = Fixed_Deposit_Term.LONG;
         }
         emit e_Service(msg.sender, "fixed_deposit", FIXED_DEPOSIT_DEDUCTION);
     }
 
     function Apply_Health_Insurance() public {
         require(
-            UserMapping[msg.sender].Health_Insurance == Health_Insurance_Term.NONE,
+            UserMapping[msg.sender].Health_Insurance ==
+                Health_Insurance_Term.NONE,
             "insurence already approved"
         );
         UserMapping[msg.sender].Health_Insurance = Health_Insurance_Term.ACTIVE;
@@ -95,8 +98,12 @@ contract Manager {
     }
 
     function Clame_Health_Insurance() public {
-        require(UserMapping[msg.sender].Health_Insurance == Health_Insurance_Term.ACTIVE);
-            UserMapping[msg.sender].Health_Insurance = Health_Insurance_Term.DEDUCED;        
+        require(
+            UserMapping[msg.sender].Health_Insurance ==
+                Health_Insurance_Term.ACTIVE
+        );
+        UserMapping[msg.sender].Health_Insurance = Health_Insurance_Term
+            .DEDUCED;
     }
 
     function Check_Provident_Fund() public view returns (bool) {
@@ -107,7 +114,11 @@ contract Manager {
         return UserMapping[msg.sender].Fixed_Deposit;
     }
 
-    function Check_Health_Insurance() public view returns (Health_Insurance_Term) {
+    function Check_Health_Insurance()
+        public
+        view
+        returns (Health_Insurance_Term)
+    {
         return UserMapping[msg.sender].Health_Insurance;
     }
 
@@ -131,15 +142,6 @@ contract Manager {
         );
         UserMapping[msg.sender].Fixed_Deposit = Fixed_Deposit_Term.NONE;
         emit e_Service(msg.sender, "cancel_fixed_deposit", 0);
-    }
-
-    function Cancel_Health_Insurance() public {
-        require(
-            UserMapping[msg.sender].Health_Insurance == Health_Insurance_Term.ACTIVE,
-            "approve first to cancel"
-        );
-        UserMapping[msg.sender].Health_Insurance = Health_Insurance_Term.NONE;
-        emit e_Service(msg.sender, "cancel_health_insurence", 0);
     }
 
     function AddBalance() external payable onlyOwner {

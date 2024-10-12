@@ -10,19 +10,23 @@ dotenv.config();
 export const UserSignup = async (req: Request, res: Response) => {
   const { name, aadhar, abhaNumber, bankDetails } = req.body;
 
-  if (!name || !aadhar || !abhaNumber || !bankDetails) {
-    res.status(400).json({ message: `please provide all the information` });
-  }
-  const wallet = ethers.Wallet.createRandom();
+    if (!name || !aadhar || !abhaNumber || !bankDetails) {
+     return res.status(400).json({ message: `please provide all the information` });
+    }
+    
 
   try {
+    
+    const wallet = ethers.Wallet.createRandom();
+    
+
     const user = await User.create({
       name: name,
       aadhar: aadhar,
       abhaNumber: abhaNumber,
       wallet: {
         address: wallet.address,
-        private: encrypt(wallet.privateKey),
+        privateKey: encrypt(wallet.privateKey),
       },
       bankDetails: {
         bankName: bankDetails.bankName,
@@ -31,17 +35,19 @@ export const UserSignup = async (req: Request, res: Response) => {
       }
     });
 
+    console.log(user)
+
     const access_token = jwt.sign(
       { aadhar: aadhar, _id: user._id },
       process.env.JWT_TOKEN as string
     );
 
-    res
+    return res
       .status(201)
       .json({ message: `user created`, access_token: access_token });
 
   } catch (e) {
-    res.status(500).json({ message: `server error` });
+    return res.status(500).json({ message: `server error ${e}` });
   }
 };
 
@@ -49,7 +55,7 @@ export const Userlogin = async (req: Request, res: Response) => {
   const { name, aadhar } = req.body;
 
   if (!name || !aadhar) {
-    res.status(400).json({ message: `please provide name and addhar` });
+    return res.status(400).json({ message: `please provide name and addhar` });
   }
 
   try {
@@ -63,10 +69,10 @@ export const Userlogin = async (req: Request, res: Response) => {
       process.env.JWT_TOKEN as string
     );
 
-    res
+    return res
       .status(201)
       .json({ message: `login successful`, access_token: access_token });
   } catch (e) {
-    res.status(500).json({ message: `server error ${e.message}` });
+    return res.status(500).json({ message: `server error ${e.message}` });
   }
 };

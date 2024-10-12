@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { CameraView, Camera } from "expo-camera";
 import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
 
 export default function App() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -27,11 +28,13 @@ export default function App() {
     setScanned(false);
   };
 
-  if (hasPermission === null) {
-    return <Text>Requesting camera permission...</Text>;
-  }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
+  if (hasPermission === null || hasPermission == false) {
+    return (
+      <ThemedView style={{ flex: 1 }}>
+        <ThemedText style={[styles.label, { top: "55%" }]}>Grant Permision ;)</ThemedText>
+        <ThemedText style={[styles.label, { top: "60%" }]}>To Access Camera</ThemedText>
+      </ThemedView>
+    );
   }
 
   return (
@@ -78,6 +81,11 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.05)",
     borderWidth: 2,
     borderRadius: 30,
+  },
+  label: {
+    fontSize: 24,
+    position: "absolute",
+    alignSelf: "center",
   },
   text: {
     fontSize: 20,
