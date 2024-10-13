@@ -1,13 +1,22 @@
-import React, { useState, useEffect } from "react";
+import BottomSheet from "@gorhom/bottom-sheet";
+import axios from "axios";
+import { EndPoint } from "@/constants/apiEndPoint";
+import { useState, useEffect, useRef } from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { CameraView, Camera } from "expo-camera";
+import { useHeader } from "@/hooks/useHeader";
+import { ThemedButton } from "@/components/Button";
+import { Sheet } from "@/components/BottomSheet";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 
 export default function App() {
+  const headers = useHeader();
+  const bottomSheetRef = useRef<BottomSheet>(null)
+  const [data, setData] = useState<any>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
-  const [scanEnabled, setScanEnabled] = useState(false);
+  const [scanEnabled, setScanEnabled] = useState(true);
 
   useEffect(() => {
     const getCameraPermissions = async () => {
@@ -16,11 +25,41 @@ export default function App() {
     };
     getCameraPermissions();
   }, []);
+  
+  const openBottomSheet = () => {
+    bottomSheetRef.current?.expand();
+  };
+
+  const handleSubmit = async () => {
+    try{
+    const response = await axios.post(`${EndPoint}/scanner`, data, {headers})  
+      if(response.status === 200){
+        console.log(`working`)
+      }
+      bottomSheetRef.current?.close();
+      setScanEnabled(true);
+      setScanned(false)
+      setData(null);
+    }catch(e){
+      console.log(`error sending creadential ${e}`)
+      setData({
+        name:'something went wrong',
+        amount: '',
+        address: '',
+      })
+    }
+  }
 
   const handleBarcodeScanned = ({ type, data }: { type: string; data: string }) => {
+    openBottomSheet();
     setScanned(true);
     setScanEnabled(false);
-    console.log(`${data}`)
+    try {
+      setData(JSON.parse(data));
+      console.log(JSON.parse(data));
+    } catch (error) {
+      console.log("Invalid QR code data");
+    }
   };
 
   const handleTapToScan = () => {
@@ -56,6 +95,23 @@ export default function App() {
           <View style={[styles.square, styles.bottomLeft]} />
         </TouchableOpacity>
       </View>
+      
+      <Sheet bottomSheetRef={bottomSheetRef}>
+      <TouchableOpacity style={{ marginBottom: 10 }} onPress={() => {
+        bottomSheetRef.current?.close(); 
+        setScanEnabled(true);
+        setScanned(false);
+        }}>
+      <Text style={{ color: 'darkorange', fontWeight: 'bold', fontSize: 20 }}>Close</Text>
+      </TouchableOpacity>
+      <View style={styles.outercontainer}>
+        <Text style={styles.name}>{data?.name}</Text>
+        <View style={styles.detailcontainer}>
+          <Text style={styles.amount}>{data?.amount}</Text>
+          <ThemedButton style={[styles.button,{width: '70%', paddingVertical: 10}]} placeholder="Pay" onPress={handleSubmit}></ThemedButton>
+        </View>
+      </View>
+      </Sheet>
     </ThemedView>
   );
 }
@@ -64,6 +120,42 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
+  },
+  outercontainer:{
+    marginTop: -20,
+    display: 'flex',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    flex: 0.9,
+  },
+  detailcontainer:{
+    display:'flex',
+    flex: 0.45,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  button:{
+    position:"absolute",
+    bottom:'0%',
+  },
+  name: {
+    fontSize: 52,
+    fontWeight: 'bold',
+    letterSpacing: 1.5,
+    color: 'gray',
+    textAlign: 'center',
+  },
+  amount:{
+    paddingVertical:10,
+    paddingHorizontal: '25%',
+    borderWidth: 2.5,
+    borderRadius: 8,
+    borderColor: 'gray',
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: 'black',
+    marginBottom: 20,
+    textAlign: 'center',   
   },
   scanner: {
     flex: 1,

@@ -27,13 +27,15 @@ export const GetLogs = async (req:Request, res: Response) => {
     }   
 }
 
-export const PostLogs:Proto_Logs = async (eventType, from, transaction_hash, to, amount) => {
+export const PostLogs:Proto_Logs = async (eventType, fromName , from, transaction_hash, to, toName, amount) => {
     try {
         await Logs.create({
             eventType,
             from,
+            fromName,
             transaction_hash,
             to,
+            toName,
             amount,
         })
         console.log(`log added`);

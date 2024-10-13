@@ -1,4 +1,4 @@
-import { useRef, useState, ReactNode } from 'react';
+import { useRef, useState, ReactNode, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, Image, TouchableOpacity, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
@@ -7,6 +7,7 @@ import { Sheet } from '@/components/BottomSheet';
 import { Provision_funds } from '@/components/bottomSheet/PF';
 import { Health_Insurence } from '@/components/bottomSheet/HI';
 import { Fixed_deposit } from '@/components/bottomSheet/FD';
+import { getDataSecure } from '@/hooks/storage';
 import BottomSheet from '@gorhom/bottom-sheet';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 
@@ -19,6 +20,7 @@ export default function Home() {
     setSheetContent(content);
     bottomSheetRef.current?.expand();
   };
+
 
   return (
     <>

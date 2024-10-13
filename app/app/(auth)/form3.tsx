@@ -35,8 +35,12 @@ export default function Sign3() {
 
       try {
         const response = await axios.post(`${EndPoint}/auth/signup`, signupData);
-        saveDataSecure({key:'access_token', value: response.data.access_token});
-        router.replace('/home')
+        if(response.status === 201){
+          saveDataSecure({key:'access_token', value: response.data.access_token});
+          router.replace('/home')
+        }else{
+          console.log('unexpected creadential');
+        }
          } catch (error) {
            console.error('Error submitting signup data:', error);
          }

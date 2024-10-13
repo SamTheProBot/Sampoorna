@@ -26,16 +26,17 @@ export async function getData (key: string) {
   
 export async function saveDataSecure({key, value}: saveProp) {
     try{
-        await SecureStore.setItemAsync(key, value);
+        const jsonValue = JSON.stringify(value);
+        await SecureStore.setItemAsync(key, jsonValue);
     }catch(e){
-        console.log('error while storing')
+        console.log('error while storing' + e)
     }
   }
    
 export async function getDataSecure(key: string) {
     try{
-        const result = await SecureStore.getItemAsync(key);
-        return result != null ? result : null;
+        const jsonValue = await SecureStore.getItemAsync(key);
+        return jsonValue != null ? JSON.parse(jsonValue) : null;
     }
     catch(e){
         console.log('error while retrival')

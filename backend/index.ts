@@ -6,6 +6,7 @@ import cors from 'cors';
 import RateLimit from './src/middleware/ratelimiter';
 import ExpressMongoSanitize from 'express-mongo-sanitize';
 import { authRoute } from './src/router/auth';
+import { otherRoute } from './src/router/other';
 dotenv.config();
 
 const app: Express = express();
@@ -21,6 +22,7 @@ app.use(ExpressMongoSanitize());
 app.use(express.json());
 app.use(helmet());
 
+app.use('/api/v1/', otherRoute)
 app.use('/api/v1/auth/', authRoute);
 app.use('/api/', RateLimit);
 
