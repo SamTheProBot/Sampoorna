@@ -1,10 +1,9 @@
 import { SafeAreaView, FlatList, StyleSheet, Image } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { Hindi } from '@/constants/Schemes';
+import { Hindi, English } from '@/constants/Schemes';
 import { SchemeCard } from '@/components/SchemeCard';
 
 export default function Additional() {
-  const data = Hindi;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -16,13 +15,9 @@ export default function Additional() {
             source={require('@/assets/images/scroll.jpg')}
           />
         }>
-        <FlatList
-          keyExtractor={(_, index) => index.toString()}
-          data={data}
-          renderItem={({ item }) => (
-            <SchemeCard scheme={item} />
-          )}
-        />
+        {Hindi.map((data, index) => (
+          <SchemeCard scheme={data} key={index} />
+        ))}
       </ParallaxScrollView>
     </SafeAreaView>
   );

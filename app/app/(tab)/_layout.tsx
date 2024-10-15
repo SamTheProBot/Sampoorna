@@ -1,22 +1,28 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
-import { StyleSheet, View, Image } from 'react-native';
+import { StyleSheet, View, Image, Text } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 export default function TabLayout() {
   return (
     <GestureHandlerRootView>
       <Tabs screenOptions={{
+        tabBarStyle: {
+          bottom: 5,
+        },
+        tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: 'black',
         tabBarBackground: () => (
           <Image source={require('@/assets/images/scroll.jpg')} />
         ),
         tabBarInactiveTintColor: 'white'
-      }}>
+      }}
+      >
         <Tabs.Screen
           name="home"
           options={{
-            title: 'Home',
+            title: 'home',
             headerShown: false,
             tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,
           }}
@@ -60,7 +66,7 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-    </GestureHandlerRootView>
+    </GestureHandlerRootView >
   );
 }
 
@@ -87,11 +93,6 @@ const styles = StyleSheet.create({
     elevation: 5,
   }
 })
-
-
-
-
-
 
 
 

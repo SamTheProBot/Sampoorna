@@ -1,19 +1,20 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import { useColorScheme } from 'react-native';
 
 interface SheetProp {
   bottomSheetRef: React.Ref<BottomSheet>;
   children: React.ReactNode,
-  snapPoints?: number,
+  snapPoints?: string,
 }
 
-export const Sheet = ({ bottomSheetRef, children }: SheetProp) => {
+export const Sheet = ({ bottomSheetRef, children, snapPoints = '65' }: SheetProp) => {
 
   return (
     <BottomSheet
       ref={bottomSheetRef}
       index={-1}
-      snapPoints={['65%']}
+      snapPoints={[`${snapPoints}%`]}
       enablePanDownToClose={true}
       topInset={10}
     >
@@ -26,14 +27,16 @@ export const Sheet = ({ bottomSheetRef, children }: SheetProp) => {
 
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0)',
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
     padding: 24,
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-  },
-  contentContainer: {
-    flex: 1,
-    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'grey',
   },
 });
 

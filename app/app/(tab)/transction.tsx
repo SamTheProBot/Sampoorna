@@ -1,10 +1,32 @@
 import { FlatList, SafeAreaView, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import { useFakeLogs, FakeLogsProp } from '@/hooks/useFakeData';
 import { ThemedView } from '@/components/ThemedView';
+import { useState, useEffect } from 'react';
+import { useHeader } from '@/hooks/useHeader';
+import { EndPoint } from '@/constants/apiEndPoint';
+import axios from 'axios';
 
 export default function Transction() {
-  const data: FakeLogsProp[] = useFakeLogs();
+  const headers = useHeader();
+  const [data, setData] = useState<any>();
+
+  useEffect(() => {
+    const func = async () => {
+      try {
+        const response = await axios.get(`${EndPoint}/getlogs`, { headers })
+        if (response.status === 200) {
+          setData(response.data);
+        }
+      }
+      catch (e) {
+        console.log(`server error ${e}`);
+      }
+    }
+    const Interval = setInterval(() => {
+      func();
+    }, 2500)
+    return () => clearInterval(Interval)
+  }, [])
 
   return (
     <>

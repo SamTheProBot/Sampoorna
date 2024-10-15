@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "deployLocal": "npx hardhat ignition deploy ignition/modules/local.ts --network localhost"
+    "deployLocal": "npx hardhat ignition deploy ignition/modules/deploy.ts --network localhost"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-ignition-ethers": "^0.15.6",

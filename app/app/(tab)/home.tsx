@@ -56,7 +56,7 @@ export default function Home() {
         </ParallaxScrollView>
 
 
-        <Sheet bottomSheetRef={bottomSheetRef}>
+        <Sheet bottomSheetRef={bottomSheetRef} snapPoints='65'>
           <TouchableOpacity style={{ marginBottom: 10 }} onPress={() => bottomSheetRef.current?.close()}>
             <Text style={{ color: 'darkorange', fontWeight: 'bold', fontSize: 20 }}>Close</Text>
           </TouchableOpacity>

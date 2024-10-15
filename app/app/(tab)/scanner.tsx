@@ -9,10 +9,13 @@ import { ThemedButton } from "@/components/Button";
 import { Sheet } from "@/components/BottomSheet";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
+import { useRouter } from "expo-router";
 
 export default function App() {
+  const router = useRouter();
   const headers = useHeader();
   const bottomSheetRef = useRef<BottomSheet>(null)
+  const paymetRef = useRef<BottomSheet>(null)
   const [data, setData] = useState<any>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
@@ -25,32 +28,42 @@ export default function App() {
     };
     getCameraPermissions();
   }, []);
-  
+
   const openBottomSheet = () => {
     bottomSheetRef.current?.expand();
   };
 
+  const openPayment = () => {
+    bottomSheetRef.current?.close();
+    paymetRef.current?.expand();
+    const Timeout = setTimeout(() => {
+      paymetRef.current?.close();
+      router.navigate('/home');
+    }, 1500);
+    return () => clearTimeout(Timeout);
+  }
+
   const handleSubmit = async () => {
-    try{
-    const response = await axios.post(`${EndPoint}/scanner`, data, {headers})  
-      if(response.status === 200){
-        console.log(`working`)
+    try {
+      const response = await axios.post(`${EndPoint}/scanner`, data, { headers })
+      if (response.status === 200) {
+        openPayment();
       }
       bottomSheetRef.current?.close();
       setScanEnabled(true);
       setScanned(false)
       setData(null);
-    }catch(e){
+    } catch (e) {
       console.log(`error sending creadential ${e}`)
       setData({
-        name:'something went wrong',
+        name: 'something went wrong',
         amount: '',
         address: '',
       })
     }
   }
 
-  const handleBarcodeScanned = ({ type, data }: { type: string; data: string }) => {
+  const handleBarcodeScanned = ({ data }: { data: string }) => {
     openBottomSheet();
     setScanned(true);
     setScanEnabled(false);
@@ -95,22 +108,25 @@ export default function App() {
           <View style={[styles.square, styles.bottomLeft]} />
         </TouchableOpacity>
       </View>
-      
-      <Sheet bottomSheetRef={bottomSheetRef}>
-      <TouchableOpacity style={{ marginBottom: 10 }} onPress={() => {
-        bottomSheetRef.current?.close(); 
-        setScanEnabled(true);
-        setScanned(false);
+
+      <Sheet bottomSheetRef={paymetRef} snapPoints="100">
+        <Text>Paymet completed</Text>
+      </Sheet>
+      <Sheet bottomSheetRef={bottomSheetRef} snapPoints="62">
+        <TouchableOpacity style={{ marginBottom: 10 }} onPress={() => {
+          bottomSheetRef.current?.close();
+          setScanEnabled(true);
+          setScanned(false);
         }}>
-      <Text style={{ color: 'darkorange', fontWeight: 'bold', fontSize: 20 }}>Close</Text>
-      </TouchableOpacity>
-      <View style={styles.outercontainer}>
-        <Text style={styles.name}>{data?.name}</Text>
-        <View style={styles.detailcontainer}>
-          <Text style={styles.amount}>{data?.amount}</Text>
-          <ThemedButton style={[styles.button,{width: '70%', paddingVertical: 10}]} placeholder="Pay" onPress={handleSubmit}></ThemedButton>
+          <Text style={{ color: 'darkorange', fontWeight: 'bold', fontSize: 20 }}>Close</Text>
+        </TouchableOpacity>
+        <View style={styles.outercontainer}>
+          <Text style={styles.name}>{data?.name}</Text>
+          <View style={styles.detailcontainer}>
+            <Text style={styles.amount}>{data?.amount}</Text>
+            <ThemedButton style={[styles.button, { width: '70%', paddingVertical: 10 }]} placeholder="Pay" onPress={handleSubmit}></ThemedButton>
+          </View>
         </View>
-      </View>
       </Sheet>
     </ThemedView>
   );
@@ -121,22 +137,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
   },
-  outercontainer:{
+  outercontainer: {
     marginTop: -20,
     display: 'flex',
     justifyContent: 'space-evenly',
     alignItems: 'center',
     flex: 0.9,
   },
-  detailcontainer:{
-    display:'flex',
+  detailcontainer: {
+    display: 'flex',
     flex: 0.45,
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  button:{
-    position:"absolute",
-    bottom:'0%',
+  button: {
+    position: "absolute",
+    bottom: '0%',
   },
   name: {
     fontSize: 52,
@@ -145,8 +161,8 @@ const styles = StyleSheet.create({
     color: 'gray',
     textAlign: 'center',
   },
-  amount:{
-    paddingVertical:10,
+  amount: {
+    paddingVertical: 10,
     paddingHorizontal: '25%',
     borderWidth: 2.5,
     borderRadius: 8,
@@ -155,7 +171,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
     marginBottom: 20,
-    textAlign: 'center',   
+    textAlign: 'center',
   },
   scanner: {
     flex: 1,

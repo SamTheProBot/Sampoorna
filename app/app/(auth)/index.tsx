@@ -19,16 +19,16 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (name && aadhar) {
-      try{
-        const response = await axios.post( `${EndPoint}/auth/login` ,{name, aadhar});
-        if (response.status === 201){
-          await saveDataSecure({key:'access_token', value: response.data.access_token});
-          route.replace('/home');  
-        }else{
+      try {
+        const response = await axios.post(`${EndPoint}/auth/login`, { name, aadhar });
+        if (response.status === 201) {
+          await saveDataSecure({ key: 'access_token', value: response.data.access_token });
+          route.replace('/home');
+        } else {
           console.log('invalid creadential');
         }
-       }
-      catch(e){
+      }
+      catch (e) {
         console.log(`server error ${e}`)
       }
     } else {
