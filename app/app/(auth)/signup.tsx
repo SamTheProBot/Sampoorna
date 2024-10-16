@@ -14,25 +14,31 @@ import { saveDataSecure } from '@/hooks/storage';
 
 export default function Login() {
   const route = useRouter();
+  const [confirm, setConfirm] = useState<boolean>(true)
   const [name, setName] = useState('');
   const [aadhar, setAadhar] = useState('');
 
   const handleLogin = async () => {
+    setConfirm(false);
     if (name && aadhar) {
       try {
         const response = await axios.post(`${EndPoint}/auth/login`, { name, aadhar });
         if (response.status === 201) {
           await saveDataSecure({ key: 'access_token', value: response.data.access_token });
+          setConfirm(true);
           route.replace('/home');
         } else {
           console.log('invalid creadential');
+          setConfirm(true);
         }
       }
       catch (e) {
         console.log(`server error ${e}`)
+          setConfirm(true);
       }
     } else {
       console.log('provide essintial credntion')
+          setConfirm(true);
     }
   };
 
@@ -52,7 +58,7 @@ export default function Login() {
             onChangeText={setAadhar}
             keyboardType="numeric"
           />
-          <ThemedButton onPress={handleLogin} placeholder='Login' />
+          <ThemedButton onPress={handleLogin} placeholder='Login' state={confirm}/>
           <ThemedText style={styles.message}>Don't have an account?</ThemedText>
           <HyperLink link={'/form1'} placeholder={'Sign up here'} />
         </TransThemedView>

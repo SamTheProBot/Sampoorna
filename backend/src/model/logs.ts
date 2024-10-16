@@ -4,7 +4,7 @@ const Logs = new Schema({
   eventType: {
     type: String,
     required: true,
-    enum: ["donation","payment" ,"fundrecive", "cancel_provident_fund", "provident_fund", "cancel_fixed_deposit", "fixed_deposit", "cancel_health_insurence", "health_insurence"],
+    enum: ["donation", "payment", "fundrecive", "cancel_provident_fund", "provident_fund", "cancel_fixed_deposit", "fixed_deposit", "health_insurence"],
   },
   from: {
     type: String,
@@ -30,9 +30,9 @@ const Logs = new Schema({
     type: Number,
     default: 0,
   },
-  time:{
+  time: {
     type: String,
-    default:() =>{ 
+    default: () => {
       const date = new Date();
       return `${date.toLocaleDateString()}-${date.toLocaleTimeString()}`;
     }

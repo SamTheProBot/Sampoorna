@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
-import { Text, StyleSheet, View, Keyboard } from 'react-native';
+import { Text, StyleSheet, View, Keyboard, ActivityIndicator } from 'react-native';
 import { BackGroundImage } from '@/components/BackGround';
 import { Input } from '@/components/Input';
 import { TransThemedView } from '@/components/ThemedView';
@@ -11,8 +11,10 @@ import { useRouter } from 'expo-router';
 import { EndPoint } from '@/constants/apiEndPoint';
 import { saveDataSecure } from '@/hooks/storage';
 
+
 export default function Sign3() {
   const router = useRouter();
+  const [confirm, setConfirm] = useState<boolean>(true);
   const [isKeyboardVisible, setKeyboardVisible] = useState<boolean>(false);
   const { signupData, setSignupData } = useContext<any>(SignupContext);
 
@@ -32,20 +34,25 @@ export default function Sign3() {
 
   const handleSubmit = async () => {
     if (signupData.bankDetails.bankName && signupData.bankDetails.accountNumber && signupData.bankDetails.ifsc) {
-
+      setConfirm(false);
       try {
         const response = await axios.post(`${EndPoint}/auth/signup`, signupData);
         if(response.status === 201){
+          setConfirm(true);
           saveDataSecure({key:'access_token', value: response.data.access_token});
           router.replace('/home')
         }else{
           console.log('unexpected creadential');
+          setConfirm(true);
+
         }
          } catch (error) {
            console.error('Error submitting signup data:', error);
+          setConfirm(true);
          }
        } else {
          console.log('Please fill out all fields');
+          setConfirm(true);
       }
   };
 
@@ -78,7 +85,7 @@ export default function Sign3() {
             }
           />
 
-          <ThemedButton style={{ marginTop: 20 }} onPress={handleSubmit} placeholder="Submit" />
+          <ThemedButton style={{ marginTop: 20 }} onPress={handleSubmit} placeholder="Submit" state={confirm}/>
         </View>
         {!isKeyboardVisible &&
           <View style={styles.navigationContainer}>

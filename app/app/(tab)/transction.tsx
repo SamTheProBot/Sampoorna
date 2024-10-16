@@ -3,29 +3,32 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useState, useEffect } from 'react';
 import { useHeader } from '@/hooks/useHeader';
+import { useFakeLogs } from '@/hooks/useFakeData';
 import { EndPoint } from '@/constants/apiEndPoint';
 import axios from 'axios';
 
 export default function Transction() {
+  const fake = useFakeLogs();
   const headers = useHeader();
   const [data, setData] = useState<any>();
 
   useEffect(() => {
-    const func = async () => {
-      try {
-        const response = await axios.get(`${EndPoint}/getlogs`, { headers })
-        if (response.status === 200) {
-          setData(response.data);
-        }
-      }
-      catch (e) {
-        console.log(`server error ${e}`);
-      }
-    }
-    const Interval = setInterval(() => {
-      func();
-    }, 2500)
-    return () => clearInterval(Interval)
+    setData(fake)  
+    // const func = async () => {
+    //   try {
+    //     const response = await axios.get(`${EndPoint}/getlogs`, { headers })
+    //     if (response.status === 200) {
+    //       setData(response.data);
+    //     }
+    //   }
+    //   catch (e) {
+    //     console.log(`server error ${e}`);
+    //   }
+    // }
+    // const Interval = setInterval(() => {
+    //   func();
+    // }, 2500)
+    // return () => clearInterval(Interval)
   }, [])
 
   return (
@@ -49,7 +52,7 @@ export default function Transction() {
                   Amount: ${item.amount.toFixed(2)}
                 </ThemedText>
                 <ThemedText style={styles.transactionHash}>
-                  Transaction: {item.transction_hash}
+                  Transaction#: {item.transction_hash}
                 </ThemedText>
               </View>
             )}

@@ -1,13 +1,12 @@
 import { useRef, useState, ReactNode, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, Image, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, SafeAreaView, ScrollView, Image, TouchableOpacity, Text } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Sheet } from '@/components/BottomSheet';
-import { Provision_funds } from '@/components/bottomSheet/PF';
+import { Provision_Fund } from '@/components/bottomSheet/PF';
 import { Health_Insurence } from '@/components/bottomSheet/HI';
-import { Fixed_deposit } from '@/components/bottomSheet/FD';
-import { getDataSecure } from '@/hooks/storage';
+import { Fixed_Deposit } from '@/components/bottomSheet/FD';
+import { Card } from '@/components/Card';
 import BottomSheet from '@gorhom/bottom-sheet';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 
@@ -21,7 +20,6 @@ export default function Home() {
     bottomSheetRef.current?.expand();
   };
 
-
   return (
     <>
       <SafeAreaView style={{ flex: 1 }}>
@@ -34,25 +32,26 @@ export default function Home() {
             />
           }
         >
-          <ThemedView style={styles.container}>
-            <ThemedText style={styles.label}>Services</ThemedText>
-            <View style={styles.optionContainer}>
-              <TouchableOpacity style={styles.option} onPress={() => router.push('/scanner')}>
-                <ThemedText style={styles.text}>Pay</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.option} onPress={() => openBottomSheet(<Health_Insurence />)}>
-                <ThemedText style={styles.text}>Health Insurance</ThemedText>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.optionContainer}>
-              <TouchableOpacity style={styles.option} onPress={() => openBottomSheet(<Provision_funds />)}>
-                <ThemedText style={styles.text}>Provision Funds</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.option} onPress={() => openBottomSheet(<Fixed_deposit />)}>
-                <ThemedText style={styles.text}>Fixed Deposits</ThemedText>
-              </TouchableOpacity>
-            </View>
-          </ThemedView>
+          <ThemedText style={styles.label}>Services</ThemedText>
+          <ScrollView style={styles.optionContainer} showsHorizontalScrollIndicator={false} horizontal>
+            <TouchableOpacity style={styles.option} onPress={() => router.push('/scanner')}>
+              <ThemedText style={styles.text}>Pay</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.option} onPress={() => openBottomSheet(<Health_Insurence ref={bottomSheetRef} />)}>
+              <ThemedText style={styles.text}>Health Insurance</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.option} onPress={() => openBottomSheet(<Provision_Fund />)}>
+              <ThemedText style={styles.text}>Provision Funds</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.option} onPress={() => openBottomSheet(<Fixed_Deposit />)}>
+              <ThemedText style={styles.text}>Fixed Deposits</ThemedText>
+            </TouchableOpacity>
+          </ScrollView>
+
+          <Card image={require('@/assets/images/health.png')} name='Health_Insurence' status={false} time='10'></Card>
+          <Card image={require('@/assets/images/pension.jpg')} name='Provision Funds' status={false} time='10'></Card>
+          <Card image={require('@/assets/images/FD.jpg')} name='Fixed Deposits' status={false} time='10'></Card>
+
         </ParallaxScrollView>
 
 
@@ -68,23 +67,21 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
   label: {
     alignSelf: 'center',
     fontSize: 24,
-    marginBottom: 24,
   },
   optionContainer: {
-    flexDirection: 'row',
-    marginBottom: 40,
-    justifyContent: 'space-around'
+    backgroundColor: 'white',
+    paddingHorizontal: 10,
+    paddingVertical: 12,
+    borderRadius: 12,
   },
   option: {
     backgroundColor: 'orange',
-    height: 60,
-    width: 120,
+    height: 90,
+    width: 140,
+    marginHorizontal: 10,
     display: 'flex',
     justifyContent: 'center',
     padding: 1,

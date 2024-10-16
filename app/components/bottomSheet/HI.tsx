@@ -1,15 +1,30 @@
+import axios from "axios";
+import { EndPoint } from "@/constants/apiEndPoint";
 import { Text, View, Image, StyleSheet } from "react-native";
 import { ThemedButton } from "../Button";
-import { useState } from "react";
+import React, { useState } from "react";
+import { useHeader } from "@/hooks/useHeader";
 
-export function Health_Insurence() {
+export function Health_Insurence(ref: any) {
+  const headers = useHeader();
   const [isRedeemed, setIsRedeemed] = useState(false);
+  const [confirm, setConfirm] = useState<boolean>(true);
 
   const onPress = () => {
-    if (!isRedeemed) {
-      console.log('Health insurance applied');
-      setIsRedeemed(true);
+    setConfirm(false);
+    const func = async () => {
+      try {
+        const response = await axios.get(`${EndPoint}/healthInsurence`, { headers })
+        if (response.status === 200) {
+
+          setConfirm(true)
+        }
+      } catch (e) {
+        console.log(`error from server ${e}`);
+        setConfirm(true)
+      }
     }
+    func();
   };
 
   return (
@@ -19,7 +34,7 @@ export function Health_Insurence() {
         Health insurance provides financial protection in case of medical emergencies. It covers expenses related to hospitalization, treatments, and surgeries, ensuring you can access the best care without worrying about the costs. Apply now to secure coverage for you and your family.
       </Text>
       {!isRedeemed ? (
-        <ThemedButton style={styles.btn} onPress={onPress} placeholder="Apply Now!" />
+        <ThemedButton style={styles.btn} onPress={onPress} placeholder="Apply Now!" state={confirm} />
       ) : (
         <Text style={styles.activatedText}>Already Activated</Text>
       )}

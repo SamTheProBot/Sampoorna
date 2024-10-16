@@ -3,11 +3,9 @@ import dotenv from 'dotenv';
 import User from '../model/user';
 import { Request, Response } from 'express';
 import { encrypt } from '../util/encrytion';
-import { abi, contractAddress, provider, privateAddress } from '../util/constant';
+import { abi, contractAddress, provider, adminPrivateKey } from '../util/constant';
 import { ethers } from 'ethers';
 dotenv.config();
-
-
 
 export const UserSignup = async (req: Request, res: Response) => {
   const { name, aadhar, abhaNumber, bankDetails, age } = req.body;
@@ -15,13 +13,11 @@ export const UserSignup = async (req: Request, res: Response) => {
   if (!name || !aadhar || !abhaNumber || !bankDetails) {
     return res.status(400).json({ message: `please provide all the information` });
   }
-  console.log(name, aadhar, abhaNumber)
   try {
 
-    const wallet = ethers.Wallet.createRandom();
-    console.log(wallet)
-    const adminWallet = new ethers.Wallet(privateAddress, provider);
-    console.log(adminWallet)
+    const wallet = ethers.Wallet.createRandom(provider);
+    const adminWallet = new ethers.Wallet(adminPrivateKey, provider);
+
     const user = await User.create({
       name: name,
       aadhar: aadhar,
@@ -38,19 +34,17 @@ export const UserSignup = async (req: Request, res: Response) => {
       }
     });
 
-    console.log(user)
     const contract = new ethers.Contract(contractAddress, abi, adminWallet)
 
-    console.log(contract)
     const tx = await contract.AddUser(wallet)
     await tx.wait();
 
-    console.log(tx)
     const access_token = jwt.sign(
       { aadhar: aadhar, _id: user._id },
       process.env.JWT_TOKEN as string
     );
 
+    console.log(`user added successfully`);
     return res
       .status(201)
       .json({ message: `user created`, access_token: access_token });

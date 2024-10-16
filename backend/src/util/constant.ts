@@ -6,7 +6,7 @@ dotenv.config()
 export const provider: any = new ethers.JsonRpcProvider('http://127.0.0.1:8545');
 //export const provider = new ethers.AlchemyProvider(process.env.SEPOLIA_RPC_URL);
 export const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
-export const privateAddress = process.env.PRIVATE_ADDRESS;
+export const adminPrivateKey = process.env.PRIVATE_KEY;
 export const abi: InterfaceAbi = [
   {
     "inputs": [],

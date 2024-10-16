@@ -1,10 +1,56 @@
-import { Text, View } from "react-native";
+import { Text, View, Image, StyleSheet } from "react-native";
+import { ThemedButton } from "../Button";
+import { useState } from "react";
 
+export function Fixed_Deposit() {
+  const [isRedeemed, setIsRedeemed] = useState(false);
 
-export function Fixed_deposit() {
+  const onPress = () => {
+    if (!isRedeemed) {
+      console.log('Health insurance applied');
+      setIsRedeemed(true);
+    }
+  };
+
   return (
-    <View>
-      <Text>thiss is the fixed deposit bottom sheet</Text>
+    <View style={styles.container}>
+      <Image style={styles.image} source={require('@/assets/images/FD.jpg')} />
+      <Text style={styles.text}>
+      Fixed Deposit offers a safe and secure way to grow your savings with guaranteed returns. By locking in a fixed amount for a specified period, you earn interest at a higher rate than a regular savings account. It’s a low-risk investment that helps you build wealth over time while ensuring your money is protected. Open a Fixed Deposit today and take a step toward achieving your financial goals
+       </Text>
+      {!isRedeemed ? (
+        <ThemedButton style={styles.btn} onPress={onPress} placeholder="Apply Now!" />
+      ) : (
+        <Text style={styles.activatedText}>Already Activated</Text>
+      )}
     </View>
-  )
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  btn: {
+    width: 200,
+  },
+  image: {
+    width: 120,
+    height: 120,
+    marginBottom: 15,
+  },
+  text: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  activatedText: {
+    fontSize: 16,
+    color: 'green',
+    marginTop: 10,
+  }
+});
+
