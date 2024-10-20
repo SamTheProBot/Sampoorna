@@ -25,7 +25,7 @@ export default function Sign2() {
   }, [])
 
   const handleNext = () => {
-    if (signupData.name && signupData.aadhar && signupData.abhaNumber && signupData.age) {
+    if (signupData.name && signupData.aadhar && signupData.contact && signupData.age) {
       router.push('/form3')
       console.log('Personal Details Saved');
     } else {
@@ -50,17 +50,18 @@ export default function Sign2() {
             keyboardType="numeric"
           />
           <Input
-            placeholder="ABHA Number"
-            value={signupData.abhaNumber}
-            onChangeText={(text) => setSignupData({ ...signupData, abhaNumber: text })}
-            keyboardType="numeric"
-          />
-          <Input
             placeholder="Age"
             value={signupData.age}
             onChangeText={(text) => setSignupData({ ...signupData, age: text })}
             keyboardType="numeric"
           />
+          <Input
+            placeholder="Contact"
+            value={signupData.contact}
+            onChangeText={(text) => setSignupData({ ...signupData, contact: text })}
+            keyboardType="numeric"
+          />
+
           <ThemedButton style={{ marginTop: 20 }} onPress={handleNext} placeholder="Next" />
         </View>
         {isKeyOpen &&

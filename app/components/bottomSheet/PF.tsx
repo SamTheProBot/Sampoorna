@@ -1,14 +1,26 @@
 import { Text, View, Image, StyleSheet } from "react-native";
 import { ThemedButton } from "../Button";
 import { useState } from "react";
+import { EndPoint } from "@/constants/apiEndPoint";
+import axios from "axios";
+import { useHeader } from "@/hooks/useHeader";
 
 export function Provision_Fund() {
+  const headers = useHeader();
   const [isRedeemed, setIsRedeemed] = useState(false);
+  const [confirm, setConfirm] = useState(true);
 
-  const onPress = () => {
-    if (!isRedeemed) {
-      console.log('Health insurance applied');
-      setIsRedeemed(true);
+  const onPress = async () => {
+    setConfirm(false);
+    try {
+      const response = await axios.get(`${EndPoint}/providentFunds`, { headers });
+      if (response.status === 200) {
+        console.log(response.data)
+        setConfirm(true)
+      }
+    } catch (e) {
+      console.log(`error from server ${e}`);
+      setConfirm(true)
     }
   };
 
@@ -16,8 +28,8 @@ export function Provision_Fund() {
     <View style={styles.container}>
       <Image style={styles.image} source={require('@/assets/images/pension.jpg')} />
       <Text style={styles.text}>
-      Provision Funds (Pension) are designed to provide financial security after retirement. By contributing regularly during your working years, you accumulate a steady source of income for the future. It ensures a stress-free retirement, giving you peace of mind and financial independence. Start your Provision Fund today and safeguard your future financial well-being
-       </Text>
+        Provision Funds (Pension) are designed to provide financial security after retirement. By contributing regularly during your working years, you accumulate a steady source of income for the future. It ensures a stress-free retirement, giving you peace of mind and financial independence. Start your Provision Fund today and safeguard your future financial well-being
+      </Text>
       {!isRedeemed ? (
         <ThemedButton style={styles.btn} onPress={onPress} placeholder="Apply Now!" />
       ) : (

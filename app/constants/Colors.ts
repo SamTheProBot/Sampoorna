@@ -3,6 +3,11 @@ const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
 export const Colors = {
+  custome: {
+    text: '#200432',
+    light: '#fee785',
+    main: 'fe8932',
+  },
   light: {
     text: '#11181C',
     background: '#fff',

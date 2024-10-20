@@ -4,13 +4,15 @@ import { Stack } from 'expo-router';
 interface Props {
   name: string,
   aadhar: string,
+  contact: string,
   abhaNumber: string,
   age: string,
   bankDetails: {
     bankName: string,
     accountNumber: string,
     ifsc: string,
-  }
+  },
+  code: string,
 }
 export interface SignUpContextProp {
   signupData: Props,
@@ -26,11 +28,13 @@ export default function Layout() {
     aadhar: '',
     abhaNumber: '',
     age: '',
+    contact: '',
     bankDetails: {
       bankName: '',
       accountNumber: '',
       ifsc: '',
-    }
+    },
+    code: ''
   });
 
   return (

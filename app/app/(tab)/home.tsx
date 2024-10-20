@@ -1,16 +1,19 @@
-import { useRef, useState, ReactNode, useEffect } from 'react';
+import { useRef, useState, ReactNode, useEffect, useContext } from 'react';
 import { StyleSheet, SafeAreaView, ScrollView, Image, TouchableOpacity, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { Sheet } from '@/components/BottomSheet';
 import { Provision_Fund } from '@/components/bottomSheet/PF';
 import { Health_Insurence } from '@/components/bottomSheet/HI';
+import { UserInfoContext } from './_layout';
 import { Fixed_Deposit } from '@/components/bottomSheet/FD';
 import { Card } from '@/components/Card';
 import BottomSheet from '@gorhom/bottom-sheet';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+
+import ParallaxScrollHome from '@/components/ParallaxHome';
 
 export default function Home() {
+  const { userData } = useContext<any>(UserInfoContext)
   const [sheetContent, setSheetContent] = useState<ReactNode>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const router = useRouter();
@@ -23,21 +26,16 @@ export default function Home() {
   return (
     <>
       <SafeAreaView style={{ flex: 1 }}>
-        <ParallaxScrollView
+        <ParallaxScrollHome
+          userInfo={userData}
           headerBackgroundColor={{ dark: "black", light: "white" }}
-          headerImage={
-            <Image
-              style={{ flex: 1, width: "100%" }}
-              source={require('@/assets/images/scroll.jpg')}
-            />
-          }
         >
           <ThemedText style={styles.label}>Services</ThemedText>
           <ScrollView style={styles.optionContainer} showsHorizontalScrollIndicator={false} horizontal>
             <TouchableOpacity style={styles.option} onPress={() => router.push('/scanner')}>
               <ThemedText style={styles.text}>Pay</ThemedText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.option} onPress={() => openBottomSheet(<Health_Insurence ref={bottomSheetRef} />)}>
+            <TouchableOpacity style={styles.option} onPress={() => openBottomSheet(<Health_Insurence />)}>
               <ThemedText style={styles.text}>Health Insurance</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity style={styles.option} onPress={() => openBottomSheet(<Provision_Fund />)}>
@@ -52,7 +50,7 @@ export default function Home() {
           <Card image={require('@/assets/images/pension.jpg')} name='Provision Funds' status={false} time='10'></Card>
           <Card image={require('@/assets/images/FD.jpg')} name='Fixed Deposits' status={false} time='10'></Card>
 
-        </ParallaxScrollView>
+        </ParallaxScrollHome>
 
 
         <Sheet bottomSheetRef={bottomSheetRef} snapPoints='65'>
@@ -61,7 +59,7 @@ export default function Home() {
           </TouchableOpacity>
           {sheetContent}
         </Sheet>
-      </SafeAreaView>
+      </SafeAreaView >
     </>
   );
 }

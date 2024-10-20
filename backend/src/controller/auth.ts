@@ -1,16 +1,22 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import User from '../model/user';
+import Verification from '../model/code'
+import twilio from "twilio";
 import { Request, Response } from 'express';
 import { encrypt } from '../util/encrytion';
 import { abi, contractAddress, provider, adminPrivateKey } from '../util/constant';
 import { ethers } from 'ethers';
 dotenv.config();
 
-export const UserSignup = async (req: Request, res: Response) => {
-  const { name, aadhar, abhaNumber, bankDetails, age } = req.body;
+const sid = process.env.ACCOUNTSID;
+const token = process.env.AUTHTOKEN;
+const client = twilio(sid, token);
 
-  if (!name || !aadhar || !abhaNumber || !bankDetails) {
+export const UserSignup = async (req: Request, res: Response) => {
+  const { name, aadhar, abhaNumber, bankDetails, age, contact } = req.body;
+
+  if (!name || !aadhar || !abhaNumber || !bankDetails || !age || !contact) {
     return res.status(400).json({ message: `please provide all the information` });
   }
   try {
@@ -22,6 +28,7 @@ export const UserSignup = async (req: Request, res: Response) => {
       name: name,
       aadhar: aadhar,
       abhaNumber: abhaNumber,
+      contact: contact,
       age: age,
       wallet: {
         address: wallet.address,
@@ -40,7 +47,7 @@ export const UserSignup = async (req: Request, res: Response) => {
     await tx.wait();
 
     const access_token = jwt.sign(
-      { aadhar: aadhar, _id: user._id },
+      { contact: contact, _id: user._id },
       process.env.JWT_TOKEN as string
     );
 
@@ -55,27 +62,63 @@ export const UserSignup = async (req: Request, res: Response) => {
 };
 
 export const Userlogin = async (req: Request, res: Response) => {
-  const { name, aadhar } = req.body;
+  const { name, contact } = req.body;
 
-  if (!name || !aadhar) {
-    return res.status(400).json({ message: `please provide name and addhar` });
+  if (!name || !contact) {
+    return res.status(400).json({ message: `please provide name and contact` });
   }
-
   try {
-    const user = await User.findOne({ aadhar: aadhar });
+    const user = await User.findOne({ contact: contact });
     if (!user) {
-      return res.status(200).json({ message: `user not found` });
+      return res.status(404).json({ message: `user not found` });
     }
+    const genCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const access_token = jwt.sign(
-      { aadhar: aadhar, _id: user._id },
-      process.env.JWT_TOKEN as string
-    );
+    await client.messages
+      .create({
+        body: `${genCode}`,
+        from: '+14053515799',
+        to: `+91${contact}`
+      })
+
+    await Verification.create({
+      contact: contact,
+      code: genCode,
+    })
 
     return res
-      .status(201)
-      .json({ message: `login successful`, access_token: access_token });
+      .status(200)
+      .json({ message: `code send` })
   } catch (e) {
     return res.status(500).json({ message: `server error ${e.message}` });
   }
 };
+
+
+export const Verify = async (req: Request, res: Response) => {
+  const { contact, code } = req.body;
+  if (!contact || !code) {
+    return res.status(400).json({ error: 'please provide contact and code' });
+  }
+  try {
+    const verify = await Verification.findOne({ contact: contact });
+    if (verify && verify.code === code) {
+      const user = await User.findOne({ contact: contact });
+      if (!user) {
+        return res.status(404).json({ message: `user not found` });
+      }
+      const access_token = jwt.sign(
+        { contact: contact, _id: user._id },
+        process.env.JWT_TOKEN as string
+      );
+      await Verification.deleteOne({ contact: contact })
+      console.log('user logined succesfully');
+      return res.status(200).json({ message: `login successful`, access_token: access_token });
+    } else {
+      return res.status(400).json({ error: 'invalid code or contact' });
+    }
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+

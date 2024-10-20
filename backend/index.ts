@@ -13,12 +13,7 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || process.env.LOCALPORT;
 
-app.use(
-  cors({
-    credentials: true,
-    origin: 'http://localhost:5173',
-  })
-);
+app.use(cors());
 app.use(ExpressMongoSanitize());
 app.use(express.json());
 app.use(helmet());

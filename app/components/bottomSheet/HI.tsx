@@ -2,29 +2,26 @@ import axios from "axios";
 import { EndPoint } from "@/constants/apiEndPoint";
 import { Text, View, Image, StyleSheet } from "react-native";
 import { ThemedButton } from "../Button";
-import React, { useState } from "react";
+import React, { useState, forwardRef } from "react";
 import { useHeader } from "@/hooks/useHeader";
 
-export function Health_Insurence(ref: any) {
+export const Health_Insurence = (ref: any) => {
   const headers = useHeader();
   const [isRedeemed, setIsRedeemed] = useState(false);
   const [confirm, setConfirm] = useState<boolean>(true);
 
-  const onPress = () => {
+  const onPress = async () => {
     setConfirm(false);
-    const func = async () => {
-      try {
-        const response = await axios.get(`${EndPoint}/healthInsurence`, { headers })
-        if (response.status === 200) {
-
-          setConfirm(true)
-        }
-      } catch (e) {
-        console.log(`error from server ${e}`);
+    try {
+      const response = await axios.get(`${EndPoint}/healthInsurence`, { headers });
+      if (response.status === 200) {
+        console.log(response.data)
         setConfirm(true)
       }
+    } catch (e) {
+      console.log(`error from server ${e}`);
+      setConfirm(true)
     }
-    func();
   };
 
   return (

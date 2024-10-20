@@ -12,11 +12,12 @@ import { EndPoint } from '@/constants/apiEndPoint';
 import { saveDataSecure } from '@/hooks/storage';
 
 
-export default function Sign3() {
+export default function Confirm() {
   const router = useRouter();
   const [confirm, setConfirm] = useState<boolean>(true);
   const [isKeyboardVisible, setKeyboardVisible] = useState<boolean>(false);
-  const { signupData, setSignupData } = useContext<any>(SignupContext);
+  const { signupData } = useContext<any>(SignupContext);
+  const [code, setCode] = useState<string>('');
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
@@ -33,18 +34,17 @@ export default function Sign3() {
   }, []);
 
   const handleSubmit = async () => {
-    if (signupData.bankDetails.bankName && signupData.bankDetails.accountNumber && signupData.bankDetails.ifsc && signupData.abhaNumber) {
+    if (signupData.code) {
       setConfirm(false);
       try {
-        const response = await axios.post(`${EndPoint}/auth/signup`, signupData);
-        if (response.status === 201) {
+        const response = await axios.post(`${EndPoint}/auth/verify`, { code, contact: signupData.code });
+        if (response.status === 200) {
           setConfirm(true);
           saveDataSecure({ key: 'access_token', value: response.data.access_token });
           router.replace('/home')
         } else {
           console.log('unexpected creadential');
           setConfirm(true);
-
         }
       } catch (error) {
         console.error('Error submitting signup data:', error);
@@ -60,34 +60,11 @@ export default function Sign3() {
     <BackGroundImage>
       <TransThemedView style={styles.container}>
         <View style={styles.formContainer}>
-          <Text style={styles.header}>Enter Bank Details</Text>
-
+          <Text style={styles.header}>Enter Varification Code</Text>
           <Input
-            placeholder="Bank Name"
-            value={signupData.bankDetails.bankName}
-            onChangeText={(text) =>
-              setSignupData({ ...signupData, bankDetails: { ...signupData.bankDetails, bankName: text } })
-            }
-          />
-          <Input
-            placeholder="Account Number"
-            value={signupData.bankDetails.accountNumber}
-            onChangeText={(text) =>
-              setSignupData({ ...signupData, bankDetails: { ...signupData.bankDetails, accountNumber: text } })
-            }
-            keyboardType="numeric"
-          />
-          <Input
-            placeholder="IFSC Code"
-            value={signupData.bankDetails.ifsc}
-            onChangeText={(text) =>
-              setSignupData({ ...signupData, bankDetails: { ...signupData.bankDetails, ifsc: text } })
-            }
-          />
-          <Input
-            placeholder="ABHA Number"
-            value={signupData.abhaNumber}
-            onChangeText={(text) => setSignupData({ ...signupData, abhaNumber: text })}
+            placeholder="Verification Code"
+            value={code}
+            onChangeText={setCode}
             keyboardType="numeric"
           />
           <ThemedButton style={{ marginTop: 20 }} onPress={handleSubmit} placeholder="Submit" state={confirm} />

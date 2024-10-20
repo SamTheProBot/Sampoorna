@@ -8,25 +8,24 @@ import { Logo } from '@/components/Logo';
 import { HyperLink } from '@/components/Navigate';
 import { TransThemedView } from '@/components/ThemedView';
 import { ThemedButton } from '@/components/Button';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { SignupContext } from './_layout';
 import { EndPoint } from '@/constants/apiEndPoint';
-import { saveDataSecure } from '@/hooks/storage';
 
 export default function Login() {
   const route = useRouter();
+  const { setSignupData, signupData } = useContext<any>(SignupContext);
   const [confirm, setConfirm] = useState<boolean>(true)
   const [name, setName] = useState('');
-  const [aadhar, setAadhar] = useState('');
 
   const handleLogin = async () => {
     setConfirm(false);
-    if (name && aadhar) {
+    if (name && signupData.code) {
       try {
-        const response = await axios.post(`${EndPoint}/auth/login`, { name, aadhar });
-        if (response.status === 201) {
-          await saveDataSecure({ key: 'access_token', value: response.data.access_token });
+        const response = await axios.post(`${EndPoint}/auth/login`, { name: name, contact: signupData.code });
+        if (response.status === 200) {
           setConfirm(true);
-          route.replace('/home');
+          route.push('/confirm');
         } else {
           console.log('invalid creadential');
           setConfirm(true);
@@ -34,11 +33,11 @@ export default function Login() {
       }
       catch (e) {
         console.log(`server error ${e}`)
-          setConfirm(true);
+        setConfirm(true);
       }
     } else {
       console.log('provide essintial credntion')
-          setConfirm(true);
+      setConfirm(true);
     }
   };
 
@@ -53,12 +52,12 @@ export default function Login() {
             onChangeText={setName}
           />
           <Input
-            placeholder='Enter your Aadhar number'
-            value={aadhar}
-            onChangeText={setAadhar}
+            placeholder='Enter your contact number'
+            value={signupData.code}
+            onChangeText={(text) => setSignupData({ ...signupData, code: text })}
             keyboardType="numeric"
           />
-          <ThemedButton onPress={handleLogin} placeholder='Login' state={confirm}/>
+          <ThemedButton onPress={handleLogin} placeholder='Login' state={confirm} />
           <ThemedText style={styles.message}>Don't have an account?</ThemedText>
           <HyperLink link={'/form1'} placeholder={'Sign up here'} />
         </TransThemedView>

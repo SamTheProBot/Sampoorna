@@ -1,72 +1,128 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
-import { StyleSheet, View, Image, Text } from 'react-native';
+import { StyleSheet, View, Image } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import axios from 'axios';
+import { EndPoint } from '@/constants/apiEndPoint';
+import { useEffect, createContext, useState } from 'react';
+import { useHeader } from '@/hooks/useHeader';
+
+interface UserProps {
+  name: string,
+  aadhar: string,
+  age: string,
+  contact: string,
+  bankName: string,
+  balance: string,
+  status: {
+    fixed: string,
+    health: string,
+    provident: string
+  }
+}
+export interface userInfoContextProp {
+  userData: UserProps,
+  setUserData: React.Dispatch<React.SetStateAction<UserProps>>;
+}
+
+export const UserInfoContext = createContext<userInfoContextProp | undefined>(undefined);
 
 export default function TabLayout() {
+  const headers = useHeader();
+  const [userData, setUserData] = useState<UserProps>({
+    name: '',
+    aadhar: '',
+    age: '',
+    contact: '',
+    balance: '',
+    bankName: '',
+    status: {
+      fixed: '',
+      health: '',
+      provident: ''
+    }
+  });
+
+  useEffect(() => {
+    const func = async () => {
+      try {
+        const response = await axios.get(`${EndPoint}/userInfo`, { headers });
+        setUserData(response.data)
+      } catch (e) {
+      }
+    }
+    func();
+  }, [headers])
+
+
   return (
-    <GestureHandlerRootView>
-      <Tabs screenOptions={{
-        tabBarStyle: {
-          bottom: 5,
-        },
-        tabBarHideOnKeyboard: true,
-        tabBarActiveTintColor: 'black',
-        tabBarBackground: () => (
-          <Image source={require('@/assets/images/scroll.jpg')} />
-        ),
-        tabBarInactiveTintColor: 'white'
-      }}
-      >
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'home',
-            headerShown: false,
-            tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,
+    <>
+      <UserInfoContext.Provider value={{ userData, setUserData }}>
+        <GestureHandlerRootView>
+          <Tabs screenOptions={{
+            tabBarStyle: {
+              bottom: 1,
+              paddingTop: 5,
+              backgroundColor: "white"
+            },
+            tabBarHideOnKeyboard: true,
+            tabBarActiveTintColor: '#200432',
+            //           tabBarBackground: () => (
+            //           <Image source={require('@/assets/images/scroll.jpg')} />
+            //       ),
+            tabBarInactiveTintColor: 'gray'
           }}
-        />
-        <Tabs.Screen
-          name="transction"
-          options={{
-            title: 'History',
-            headerShown: false,
-            tabBarIcon: ({ color }) => <FontAwesome size={28} name="history" color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="scanner"
-          options={{
-            title: '',
-            headerShown: false,
-            tabBarIcon: ({ color }) => (
-              <View style={styles.cameraButtonContainer}>
-                <View style={styles.cameraButton}>
-                  <FontAwesome size={24} name="inr" color={color} />
-                </View>
-              </View>
-            )
-          }}
-        />
-        <Tabs.Screen
-          name="additional"
-          options={{
-            title: 'Additional',
-            headerShown: false,
-            tabBarIcon: ({ color }) => <FontAwesome size={26} name="info-circle" color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="setting"
-          options={{
-            title: 'setting',
-            headerShown: false,
-            tabBarIcon: ({ color }) => <FontAwesome size={28} name="cog" color={color} />,
-          }}
-        />
-      </Tabs>
-    </GestureHandlerRootView >
+          >
+            <Tabs.Screen
+              name="home"
+              options={{
+                title: '',
+                headerShown: false,
+                tabBarIcon: ({ color }) => <FontAwesome size={32} name="home" color={color} />,
+              }}
+            />
+            <Tabs.Screen
+              name="transction"
+              options={{
+                title: '',
+                headerShown: false,
+                tabBarIcon: ({ color }) => <FontAwesome size={32} name="history" color={color} />,
+              }}
+            />
+            <Tabs.Screen
+              name="scanner"
+              options={{
+                title: '',
+                headerShown: false,
+                tabBarIcon: ({ color }) => (
+                  <View style={styles.cameraButtonContainer}>
+                    <View style={styles.cameraButton}>
+                      <FontAwesome size={26} name="inr" color={color} />
+                    </View>
+                  </View>
+                )
+              }}
+            />
+            <Tabs.Screen
+              name="additional"
+              options={{
+                title: '',
+                headerShown: false,
+                tabBarIcon: ({ color }) => <FontAwesome size={30} name="info-circle" color={color} />,
+              }}
+            />
+            <Tabs.Screen
+              name="setting"
+              options={{
+                title: '',
+                headerShown: false,
+                tabBarIcon: ({ color }) => <FontAwesome size={32} name="cog" color={color} />,
+              }}
+            />
+          </Tabs>
+        </GestureHandlerRootView >
+      </UserInfoContext.Provider>
+    </>
   );
 }
 
