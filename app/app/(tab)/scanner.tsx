@@ -1,10 +1,11 @@
 import BottomSheet from "@gorhom/bottom-sheet";
 import axios from "axios";
 import { EndPoint } from "@/constants/apiEndPoint";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { CameraView, Camera } from "expo-camera";
 import { useHeader } from "@/hooks/useHeader";
+import { UserInfoContext } from "./_layout";
 import { ThemedButton } from "@/components/Button";
 import { Sheet } from "@/components/BottomSheet";
 import { ThemedView } from "@/components/ThemedView";
@@ -15,10 +16,12 @@ export default function App() {
   const router = useRouter();
   const headers = useHeader();
   const bottomSheetRef = useRef<BottomSheet>(null)
-  const paymetRef = useRef<BottomSheet>(null)
+  const { useData } = useContext<any>(UserInfoContext);
   const [data, setData] = useState<any>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
+  const [enough, setEnough] = useState(true);
+  const [confirm, setConfirm] = useState(true);
   const [scanEnabled, setScanEnabled] = useState(true);
 
   useEffect(() => {
@@ -33,33 +36,25 @@ export default function App() {
     bottomSheetRef.current?.expand();
   };
 
-  const openPayment = () => {
-    bottomSheetRef.current?.close();
-    paymetRef.current?.expand();
-    const Timeout = setTimeout(() => {
-      paymetRef.current?.close();
-      router.navigate('/home');
-    }, 1500);
-    return () => clearTimeout(Timeout);
-  }
-
   const handleSubmit = async () => {
+    setConfirm(false);
     try {
       const response = await axios.post(`${EndPoint}/scanner`, data, { headers })
       if (response.status === 200) {
-        openPayment();
+        router.push('/success');
+      } else if (response.status === 202) {
+        router.push('/fail')
       }
       bottomSheetRef.current?.close();
       setScanEnabled(true);
+      setConfirm(true);
       setScanned(false)
+      setEnough(true);
       setData(null);
     } catch (e) {
-      console.log(`error sending creadential ${e}`)
-      setData({
-        name: 'something went wrong',
-        amount: '',
-        address: '',
-      })
+      setConfirm(true);
+      router.push('/fail')
+      //     setEnough(false)
     }
   }
 
@@ -69,7 +64,6 @@ export default function App() {
     setScanEnabled(false);
     try {
       setData(JSON.parse(data));
-      console.log(JSON.parse(data));
     } catch (error) {
       console.log("Invalid QR code data");
     }
@@ -78,6 +72,7 @@ export default function App() {
   const handleTapToScan = () => {
     setScanEnabled(true);
     setScanned(false);
+    setEnough(true)
   };
 
   if (hasPermission === null || hasPermission == false) {
@@ -90,47 +85,56 @@ export default function App() {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={{ flex: 1 }}>
-        <CameraView
-          onBarcodeScanned={scanned || !scanEnabled ? undefined : handleBarcodeScanned}
-          barcodeScannerSettings={{
-            barcodeTypes: ["qr", "pdf417"],
-          }}
-          style={styles.scanner}
-        />
 
-        <TouchableOpacity onPress={handleTapToScan} style={styles.tapArea}>
-          <Text style={styles.text}>Tap to Scan QR</Text>
-          <View style={[styles.square, styles.topRight]} />
-          <View style={[styles.square, styles.bottomRight]} />
-          <View style={[styles.square, styles.topLeft]} />
-          <View style={[styles.square, styles.bottomLeft]} />
-        </TouchableOpacity>
-      </View>
+    enough ? (
+      <ThemedView style={styles.container}>
+        <View style={{ flex: 1 }}>
+          <CameraView
+            onBarcodeScanned={scanned || !scanEnabled ? undefined : handleBarcodeScanned}
+            barcodeScannerSettings={{
+              barcodeTypes: ["qr", "pdf417"],
+            }}
+            style={styles.scanner}
+          />
 
-      <Sheet bottomSheetRef={paymetRef} snapPoints="100">
-        <Text>Paymet completed</Text>
-      </Sheet>
-      <Sheet bottomSheetRef={bottomSheetRef} snapPoints="62">
-        <TouchableOpacity style={{ marginBottom: 10 }} onPress={() => {
-          bottomSheetRef.current?.close();
-          setScanEnabled(true);
-          setScanned(false);
-        }}>
-          <Text style={{ color: 'darkorange', fontWeight: 'bold', fontSize: 20 }}>Close</Text>
-        </TouchableOpacity>
-        <View style={styles.outercontainer}>
-          <Text style={styles.name}>{data?.name}</Text>
-          <View style={styles.detailcontainer}>
-            <Text style={styles.amount}>{data?.amount}</Text>
-            <ThemedButton style={[styles.button, { width: '70%', paddingVertical: 10 }]} placeholder="Pay" onPress={handleSubmit}></ThemedButton>
-          </View>
+          <TouchableOpacity onPress={handleTapToScan} style={styles.tapArea}>
+            <Text style={styles.text}>Tap to Scan QR</Text>
+            <View style={[styles.square, styles.topRight]} />
+            <View style={[styles.square, styles.bottomRight]} />
+            <View style={[styles.square, styles.topLeft]} />
+            <View style={[styles.square, styles.bottomLeft]} />
+          </TouchableOpacity>
         </View>
-      </Sheet>
-    </ThemedView>
-  );
+
+        <Sheet bottomSheetRef={bottomSheetRef} snapPoints="62">
+          <TouchableOpacity style={{ marginBottom: 10 }} onPress={() => {
+            bottomSheetRef.current?.close();
+            setScanEnabled(true);
+            setScanned(false);
+          }}>
+            <Text style={{ color: 'darkorange', fontWeight: 'bold', fontSize: 20 }}>Close</Text>
+          </TouchableOpacity>
+          <View style={styles.outercontainer}>
+            <Text style={data?.name.length < 25 ? styles.longName : styles.shortName}>{data?.name}</Text>
+            <View style={styles.detailcontainer}>
+              <Text style={styles.amount}>{data?.amount ? (data.amount / 1e16).toFixed(2) : "0"} EST</Text>
+              <ThemedButton
+                style={[styles.button, { width: '68%', paddingVertical: 10, marginBottom: -10 }]}
+                state={confirm}
+                placeholder="Pay"
+                onPress={handleSubmit}
+              />
+            </View>
+          </View>
+        </Sheet>
+      </ThemedView>
+    ) : (
+      <Text></Text>
+    )
+  )
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -154,8 +158,17 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: '0%',
   },
-  name: {
-    fontSize: 52,
+  longName: {
+    fontSize: 50,
+    paddingHorizontal: 20,
+    fontWeight: 'bold',
+    letterSpacing: 1.5,
+    color: 'gray',
+    textAlign: 'center',
+  },
+  shortName: {
+    fontSize: 40,
+    paddingHorizontal: 15,
     fontWeight: 'bold',
     letterSpacing: 1.5,
     color: 'gray',
@@ -163,7 +176,7 @@ const styles = StyleSheet.create({
   },
   amount: {
     paddingVertical: 10,
-    paddingHorizontal: '25%',
+    paddingHorizontal: '15%',
     borderWidth: 2.5,
     borderRadius: 8,
     borderColor: 'gray',

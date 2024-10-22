@@ -1,22 +1,31 @@
 import { Text, View, Image, StyleSheet } from "react-native";
 import { ThemedButton } from "../Button";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { EndPoint } from "@/constants/apiEndPoint";
+import { UserInfoContext } from "@/app/(tab)/_layout";
 import axios from "axios";
 import { useHeader } from "@/hooks/useHeader";
 
-export function Provision_Fund() {
+interface pf {
+  closePanal: () => void
+}
+
+export function Provision_Fund({ closePanal }: pf) {
+  const { userData, fetchUserInfo } = useContext<any>(UserInfoContext);
   const headers = useHeader();
-  const [isRedeemed, setIsRedeemed] = useState(false);
   const [confirm, setConfirm] = useState(true);
 
   const onPress = async () => {
     setConfirm(false);
     try {
       const response = await axios.get(`${EndPoint}/providentFunds`, { headers });
-      if (response.status === 200) {
-        console.log(response.data)
+      if (response.status === 201) {
+        closePanal();
+        fetchUserInfo()
         setConfirm(true)
+      } else if (response.status === 200) {
+        closePanal();
+        fetchUserInfo()
       }
     } catch (e) {
       console.log(`error from server ${e}`);
@@ -28,10 +37,10 @@ export function Provision_Fund() {
     <View style={styles.container}>
       <Image style={styles.image} source={require('@/assets/images/pension.jpg')} />
       <Text style={styles.text}>
-        Provision Funds (Pension) are designed to provide financial security after retirement. By contributing regularly during your working years, you accumulate a steady source of income for the future. It ensures a stress-free retirement, giving you peace of mind and financial independence. Start your Provision Fund today and safeguard your future financial well-being
+        provident Funds (Pension) are designed to provide financial security after retirement. By contributing regularly during your working years, you accumulate a steady source of income for the future. It ensures a stress-free retirement, giving you peace of mind and financial independence. Start your Provision Fund today and safeguard your future financial well-being
       </Text>
-      {!isRedeemed ? (
-        <ThemedButton style={styles.btn} onPress={onPress} placeholder="Apply Now!" />
+      {userData.status.provident === 'none' ? (
+        <ThemedButton style={styles.btn} state={confirm} onPress={onPress} placeholder="Apply Now!" />
       ) : (
         <Text style={styles.activatedText}>Already Activated</Text>
       )}
@@ -60,7 +69,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   activatedText: {
-    fontSize: 16,
+    fontSize: 32,
     color: 'green',
     marginTop: 10,
   }

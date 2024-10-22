@@ -1,22 +1,31 @@
 import { Text, View, Image, StyleSheet } from "react-native";
 import { ThemedButton } from "../Button";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useHeader } from "@/hooks/useHeader";
 import { EndPoint } from "@/constants/apiEndPoint";
+import { UserInfoContext } from "@/app/(tab)/_layout";
 import axios from "axios";
 
-export function Fixed_Deposit() {
+interface fd {
+  closePanal: () => void
+}
+
+export function Fixed_Deposit({ closePanal }: fd) {
+  const { userData, fetchUserInfo } = useContext<any>(UserInfoContext);
   const headers = useHeader();
   const [confirm, setConfirm] = useState(true);
-  const [isRedeemed, setIsRedeemed] = useState(false);
 
   const onPress = async () => {
     setConfirm(false);
     try {
       const response = await axios.get(`${EndPoint}/fixedDeposit`, { headers });
-      if (response.status === 200) {
-        console.log(response.data)
+      if (response.status === 201) {
+        closePanal()
+        fetchUserInfo()
         setConfirm(true)
+      } else if (response.status === 200) {
+        closePanal();
+        fetchUserInfo()
       }
     } catch (e) {
       console.log(`error from server ${e}`);
@@ -30,8 +39,8 @@ export function Fixed_Deposit() {
       <Text style={styles.text}>
         Fixed Deposit offers a safe and secure way to grow your savings with guaranteed returns. By locking in a fixed amount for a specified period, you earn interest at a higher rate than a regular savings account. It’s a low-risk investment that helps you build wealth over time while ensuring your money is protected. Open a Fixed Deposit today and take a step toward achieving your financial goals
       </Text>
-      {!isRedeemed ? (
-        <ThemedButton style={styles.btn} onPress={onPress} placeholder="Apply Now!" />
+      {userData.status.fixed === 'none' ? (
+        <ThemedButton style={styles.btn} onPress={onPress} state={confirm} placeholder="Apply Now!" />
       ) : (
         <Text style={styles.activatedText}>Already Activated</Text>
       )}
@@ -60,7 +69,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   activatedText: {
-    fontSize: 16,
+    fontSize: 32,
+    fontWeight: 'bold',
     color: 'green',
     marginTop: 10,
   }

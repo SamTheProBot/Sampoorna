@@ -8,7 +8,7 @@ interface SheetProp {
   snapPoints?: string,
 }
 
-export const Sheet = ({ bottomSheetRef, children, snapPoints = '65' }: SheetProp) => {
+export const Sheet = ({ bottomSheetRef, children, snapPoints = '60' }: SheetProp) => {
 
   return (
     <BottomSheet

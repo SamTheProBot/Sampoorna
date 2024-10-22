@@ -1,6 +1,6 @@
 import express, { Router } from 'express';
 import { AuthMiddleware } from '../middleware/auth';
-import { GovServices, HealthInsurence, FixedDeposit, ProvidentFunds } from '../controller/services';
+import { GovServices, HealthInsurence, FixedDeposit, ProvidentFunds, CancelFixedDeposit, CancelProvidentFunds } from '../controller/services';
 import { UserInfo } from '../controller/user';
 export const otherRoute: Router = express.Router();
 

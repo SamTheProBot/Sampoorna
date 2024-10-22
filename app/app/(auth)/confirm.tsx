@@ -59,15 +59,15 @@ export default function Confirm() {
   return (
     <BackGroundImage>
       <TransThemedView style={styles.container}>
-        <View style={styles.formContainer}>
+     <View style={[styles.formContainer, { marginTop: isKeyboardVisible ? 10 : -80 }]}>
           <Text style={styles.header}>Enter Varification Code</Text>
-          <Input
+          <Input 
             placeholder="Verification Code"
             value={code}
             onChangeText={setCode}
             keyboardType="numeric"
           />
-          <ThemedButton style={{ marginTop: 20 }} onPress={handleSubmit} placeholder="Submit" state={confirm} />
+          <ThemedButton style={{ marginTop: 10, width: '80%' }} onPress={handleSubmit} placeholder="Submit" state={confirm} />
         </View>
         {!isKeyboardVisible &&
           <View style={styles.navigationContainer}>
@@ -85,11 +85,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'darkorange',
-    marginBottom: 30,
+    marginBottom: 45,
   },
   formContainer: {
     flex: 1,
-    marginTop: -75,
     justifyContent: 'center',
     padding: 20,
     alignItems: 'center',

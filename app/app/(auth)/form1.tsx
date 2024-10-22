@@ -42,7 +42,6 @@ const styles = StyleSheet.create({
   labelContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
   },
   label: {
     fontSize: 28,

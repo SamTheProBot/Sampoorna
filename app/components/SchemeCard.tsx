@@ -25,8 +25,8 @@ const styles = StyleSheet.create({
   itemContainer: {
     flexDirection: 'row',
     padding: 10,
-    marginVertical: 10,
-    backgroundColor: '#fcede8',
+    marginVertical: 8,
+    backgroundColor: '#f9f3ea',
     borderRadius: 8,
     shadowColor: '#000',
     shadowOpacity: 0.1,

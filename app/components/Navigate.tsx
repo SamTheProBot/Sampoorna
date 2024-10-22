@@ -36,7 +36,7 @@ export function Navigate({ isBack, link, style }: NavigationProp) {
               router.back();
             }}
           >
-            <FontAwesome size={20} name="chevron-left" color={'darkorange'} />
+            <FontAwesome size={22} name="chevron-left" color={'darkorange'} />
             <Text style={styles.text}>Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -49,7 +49,7 @@ export function Navigate({ isBack, link, style }: NavigationProp) {
             }}
           >
             <Text style={styles.text}>Go Next</Text>
-            <FontAwesome size={20} name="chevron-right" color={'darkorange'} />
+            <FontAwesome size={22} name="chevron-right" color={'darkorange'} />
           </TouchableOpacity>
         </View>
       )}
@@ -68,7 +68,8 @@ const styles = StyleSheet.create({
   },
   text: {
     marginHorizontal: 10,
-    fontSize: 18,
+    fontSize: 20,
+    fontWeight: 'bold',
     color: 'darkorange',
   },
 });

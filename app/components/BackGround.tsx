@@ -4,7 +4,7 @@ export function BackGroundImage({ children }: any) {
   return (
     <>
       <SafeAreaView style={{ flex: 1 }}>
-        <ImageBackground source={require('../assets/images/background.jpeg')} style={styles.imageback} >
+        <ImageBackground source={require('../assets/images/background.jpg')} style={styles.imageback} >
           {children}
         </ImageBackground>
       </SafeAreaView>

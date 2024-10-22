@@ -56,7 +56,7 @@ export default function Setting() {
       </View>
       <View style={{ marginBottom: 7 }}>
         <Tab title="Bank" val={userData.bankName} />
-        <Tab title="Balance" val={userData.balance} />
+        <Tab title="Balance" val={parseFloat(userData.balance).toFixed(10)} />
       </View>
       <View>
         <TouchableOpacity style={styles.tabRow}>
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   },
   settingText: {
     color: 'white',
-    fontSize: 43,
+    fontSize: 40,
     fontWeight: 'bold',
   },
   infoContainer: {
@@ -134,6 +134,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   tabText: {
-    fontSize: 22,
+    fontSize: 19,
   },
 });

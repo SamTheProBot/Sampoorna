@@ -31,10 +31,10 @@ const Logs = new Schema({
     default: 0,
   },
   time: {
-    type: String,
+    type: Date,
     default: () => {
       const date = new Date();
-      return `${date.toLocaleDateString()}-${date.toLocaleTimeString()}`;
+      return `${date.toLocaleString()}`;
     }
   }
 });

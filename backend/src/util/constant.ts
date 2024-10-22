@@ -5,8 +5,8 @@ dotenv.config()
 
 export const provider: any = new ethers.JsonRpcProvider('http://127.0.0.1:8545');
 //export const provider = new ethers.AlchemyProvider(process.env.SEPOLIA_RPC_URL);
-export const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 export const adminPrivateKey = process.env.PRIVATE_KEY;
+export const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 export const abi: InterfaceAbi = [
   {
     "inputs": [],
@@ -97,6 +97,19 @@ export const abi: InterfaceAbi = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "AddValidAccount",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "Apply_Fixed_Deposit",
     "outputs": [],
@@ -152,6 +165,25 @@ export const abi: InterfaceAbi = [
         "type": "address"
       }
     ],
+    "name": "CheckValidAccount",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
     "name": "Check_Status",
     "outputs": [
       {
@@ -192,6 +224,19 @@ export const abi: InterfaceAbi = [
     "name": "Clame_Provident_Fund",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ContractBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -248,7 +293,7 @@ export const abi: InterfaceAbi = [
   },
   {
     "inputs": [],
-    "name": "QUOTA_AMOUNT",
+    "name": "QUOTAStatus",
     "outputs": [
       {
         "internalType": "uint256",
@@ -261,7 +306,7 @@ export const abi: InterfaceAbi = [
   },
   {
     "inputs": [],
-    "name": "QUOTA_Status",
+    "name": "QUOTA_AMOUNT",
     "outputs": [
       {
         "internalType": "uint256",

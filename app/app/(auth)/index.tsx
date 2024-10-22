@@ -1,22 +1,38 @@
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { BackGroundImage } from '@/components/BackGround';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Keyboard } from 'react-native';
 import { Input } from "@/components/Input";
 import { ThemedText } from '@/components/ThemedText';
 import { Logo } from '@/components/Logo';
 import { HyperLink } from '@/components/Navigate';
 import { TransThemedView } from '@/components/ThemedView';
 import { ThemedButton } from '@/components/Button';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { SignupContext } from './_layout';
 import { EndPoint } from '@/constants/apiEndPoint';
 
 export default function Login() {
   const route = useRouter();
   const { setSignupData, signupData } = useContext<any>(SignupContext);
-  const [confirm, setConfirm] = useState<boolean>(true)
+  const [confirm, setConfirm] = useState<boolean>(true);
   const [name, setName] = useState('');
+  const [isKeyboardVisible, setKeyboardVisible] = useState<boolean>(false);
+
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const handleLogin = async () => {
     setConfirm(false);
@@ -44,7 +60,7 @@ export default function Login() {
   return (
     <>
       <BackGroundImage>
-        <TransThemedView style={styles.container}>
+        <TransThemedView style={[styles.container, { marginTop: isKeyboardVisible ? 20 : -20 }]}>
           <Logo />
           <Input
             placeholder='Enter your name'
@@ -59,7 +75,9 @@ export default function Login() {
           />
           <ThemedButton onPress={handleLogin} placeholder='Login' state={confirm} />
           <ThemedText style={styles.message}>Don't have an account?</ThemedText>
-          <HyperLink link={'/form1'} placeholder={'Sign up here'} />
+          { !isKeyboardVisible && 
+            <HyperLink link={'/form1'} placeholder={'Sign up here'} />
+          }
         </TransThemedView>
       </BackGroundImage>
     </>
@@ -69,7 +87,6 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: -20,
     justifyContent: 'center',
     padding: 20,
     alignItems: 'center',

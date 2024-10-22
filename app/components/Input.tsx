@@ -7,6 +7,7 @@ interface InputProps {
   onChangeText: (text: string) => void;
   keyboardType?: any;
   secureTextEntry?: boolean;
+  style?: any;
 }
 
 export function Input({
@@ -15,13 +16,14 @@ export function Input({
   onChangeText,
   keyboardType = 'default',
   secureTextEntry = false,
+  style
 }: InputProps) {
   return (
     <ThemedView style={styles.container}>
       <TextInput
         placeholder={placeholder}
         placeholderTextColor="#999"
-        style={styles.input}
+        style={[styles.input, {...style}]}
         value={value}
         onChangeText={onChangeText}
         keyboardType={keyboardType}
@@ -35,16 +37,16 @@ const styles = StyleSheet.create({
     width: "80%",
     marginBottom: 20,
     alignSelf: 'center',
+    borderRadius: 7,
   },
   input: {
     width: "100%",
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderWidth: 1,
+    borderWidth: 1.4,
     borderColor: "darkorange",
     borderRadius: 7,
     backgroundColor: "#FcF5ED",
     fontSize: 16,
-    color: "#333",
   },
 });

@@ -10,7 +10,7 @@ export const UserInfo = async (req: ExtendedRequset, res: Response) => {
   const { _id } = req.user;
 
   try {
-    const user = await User.findById(_id);
+    const user = await User.findById(_id).lean();
     if (!user) {
       return res.status(404).json({ message: `user not found` });
     }

@@ -1,6 +1,6 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
-import { StyleSheet, View, Image } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import axios from 'axios';
 import { EndPoint } from '@/constants/apiEndPoint';
@@ -20,9 +20,11 @@ interface UserProps {
     provident: string
   }
 }
+
 export interface userInfoContextProp {
   userData: UserProps,
   setUserData: React.Dispatch<React.SetStateAction<UserProps>>;
+  fetchUserInfo: () => void;
 }
 
 export const UserInfoContext = createContext<userInfoContextProp | undefined>(undefined);
@@ -43,21 +45,22 @@ export default function TabLayout() {
     }
   });
 
-  useEffect(() => {
-    const func = async () => {
-      try {
-        const response = await axios.get(`${EndPoint}/userInfo`, { headers });
-        setUserData(response.data)
-      } catch (e) {
-      }
+  const fetchUserInfo = async () => {
+    try {
+      const response = await axios.get(`${EndPoint}/userInfo`, { headers });
+      setUserData({ ...response.data, balance: response.data.balance * 100 })
+    } catch (e) {
     }
-    func();
+  }
+
+  useEffect(() => {
+    fetchUserInfo()
   }, [headers])
 
 
   return (
     <>
-      <UserInfoContext.Provider value={{ userData, setUserData }}>
+      <UserInfoContext.Provider value={{ userData, setUserData, fetchUserInfo }}>
         <GestureHandlerRootView>
           <Tabs screenOptions={{
             tabBarStyle: {

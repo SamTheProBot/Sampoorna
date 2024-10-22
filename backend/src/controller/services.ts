@@ -14,13 +14,20 @@ export const GovServices = async (req: ExtendedRequset, res: Response) => {
     const { _id } = req.user;
 
     try {
-        amount = amount * 1000;
-        const user = await User.findById(_id);
+        const user = await User.findById(_id).lean();
         if (!user) {
-            res.status(404).json({ message: `user not found` });
+            return res.status(404).json({ message: `user not found` });
         }
         const privateAddress = decrypt(user.wallet.privateKey);
         const wallet = new ethers.Wallet(privateAddress, provider);
+        const contract = new ethers.Contract(contractAddress, abi, wallet);
+
+        const validty = await contract.CheckValidAccount(address);
+
+
+        if (!validty) {
+            return res.status(202).json({ message: `Invalid Account` })
+        }
         const tx = {
             to: address,
             value: amount,
@@ -28,13 +35,12 @@ export const GovServices = async (req: ExtendedRequset, res: Response) => {
 
         const transaction = await wallet.sendTransaction(tx);
 
-        res.status(200).json({ message: 'TransctionSigned' })
-
-        transaction.wait(1);
+        await transaction.wait(1);
 
         await PostLogs("payment", user.wallet.address, user.name, transaction.hash, address, name, amount);
+        return res.status(200).json({ message: 'TransctionSigned' })
     } catch (e) {
-        res.status(500).json({ message: `server error ${e.message}` })
+        return res.status(500).json({ message: `server error ${e.message}` })
     }
 }
 
@@ -46,6 +52,9 @@ export const FixedDeposit = async (req: ExtendedRequset, res: Response) => {
         if (!user) {
             return res.status(404).json({ message: `user not found` });
         }
+        if (user.status.fixed !== 'none') {
+            return res.status(200).json({ message: `already approved` })
+        }
         const privateAddress = decrypt(user.wallet.privateKey);
         const wallet = new ethers.Wallet(privateAddress, provider);
         const contract = new ethers.Contract(contractAddress, abi, wallet);
@@ -56,12 +65,17 @@ export const FixedDeposit = async (req: ExtendedRequset, res: Response) => {
         } catch (e) {
             const err = ErrorHandler(e);
             if (err != null) {
+                user.status.fixed = 'active';
+                await user.save();
                 return res.status(200).json({ message: e.reason });
             } else {
                 return res.status(500).json({ message: `blockchain error` })
             }
         }
         await transction.wait(1);
+
+        user.status.fixed = 'active';
+        await user.save();
 
         await PostLogs(
             'fixed_deposit',
@@ -73,7 +87,7 @@ export const FixedDeposit = async (req: ExtendedRequset, res: Response) => {
             0
         );
 
-        return res.status(200).json({ message: `fixed_deposit approved` })
+        return res.status(201).json({ message: `fixed_deposit approved` })
     } catch (e) {
         return res.status(500).json({ message: `server error ${e.message}` })
     }
@@ -87,6 +101,9 @@ export const HealthInsurence = async (req: ExtendedRequset, res: Response) => {
         if (!user) {
             return res.status(404).json({ message: `user not found` });
         }
+        if (user.status.health !== 'none') {
+            return res.status(200).json({ message: `already approved` })
+        }
         const privateAddress = decrypt(user.wallet.privateKey);
         const wallet = new ethers.Wallet(privateAddress, provider);
         const contract = new ethers.Contract(contractAddress, abi, wallet);
@@ -96,12 +113,18 @@ export const HealthInsurence = async (req: ExtendedRequset, res: Response) => {
         } catch (e) {
             const err = ErrorHandler(e);
             if (err) {
+                user.status.health = 'active';
+                await user.save()
+
                 return res.status(200).json({ message: e.reason });
             } else {
                 return res.status(500).json({ message: 'Blockchain error' });
             }
         }
         await transaction.wait(1);
+
+        user.status.health = 'active';
+        await user.save()
 
         await PostLogs(
             'health_insurence',
@@ -127,6 +150,9 @@ export const ProvidentFunds = async (req: ExtendedRequset, res: Response) => {
         if (!user) {
             return res.status(404).json({ message: `user not found` });
         }
+        if (user.status.provident !== 'none') {
+            return res.status(200).json({ message: `already approved` })
+        }
         const privateAddress = decrypt(user.wallet.privateKey);
         const wallet = new ethers.Wallet(privateAddress, provider);
         const contract = new ethers.Contract(contractAddress, abi, wallet);
@@ -136,6 +162,8 @@ export const ProvidentFunds = async (req: ExtendedRequset, res: Response) => {
         } catch (e) {
             const err = ErrorHandler(e);
             if (err != null) {
+                user.status.provident = 'active';
+                await user.save()
                 return res.status(200).json({ message: e.reason });
             } else {
                 return res.status(500).json({ message: `blockchain error` })
@@ -143,8 +171,11 @@ export const ProvidentFunds = async (req: ExtendedRequset, res: Response) => {
         }
         await transction.wait(1);
 
+        user.status.provident = 'active';
+        await user.save()
+
         await PostLogs(
-            'health_insurence',
+            'provident_fund',
             user.wallet.address,
             user.name,
             transction.hash,
@@ -158,3 +189,78 @@ export const ProvidentFunds = async (req: ExtendedRequset, res: Response) => {
         return res.status(500).json({ message: `server error ${e.message}` })
     }
 }
+
+export const CancelProvidentFunds = async (req: ExtendedRequset, res: Response) => {
+    const { _id } = req.user;
+
+    try {
+        const user = await User.findById(_id);
+        if (!user) {
+            return res.status(404).json({ message: `user not found` });
+        }
+        if (user.status.provident !== 'active') {
+            return res.status(200).json({ message: `already approved` })
+        }
+        const privateAddress = decrypt(user.wallet.privateKey);
+        const wallet = new ethers.Wallet(privateAddress, provider);
+        const contract = new ethers.Contract(contractAddress, abi, wallet);
+        let transction: any;
+        try {
+            transction = await contract.Cancel_Provident_Fund()
+        } catch (e) {
+            const err = ErrorHandler(e);
+            if (err != null) {
+                user.status.provident = 'none';
+                await user.save()
+                return res.status(200).json({ message: e.reason });
+            } else {
+                return res.status(500).json({ message: `blockchain error` })
+            }
+        }
+        await transction.wait(1);
+
+        user.status.provident = 'none';
+        await user.save()
+
+        res.status(200).json({ message: "success" })
+    } catch (e) {
+        return res.status(500).json({ message: `server error ${e.message}` })
+    }
+}
+
+export const CancelFixedDeposit = async (req: ExtendedRequset, res: Response) => {
+    const { _id } = req.user;
+
+    try {
+        const user = await User.findById(_id);
+        if (!user) {
+            return res.status(404).json({ message: `user not found` });
+        }
+
+        user.status.fixed = 'none';
+        await user.save()
+
+        res.status(200).json({ message: "success" })
+    } catch (e) {
+        return res.status(500).json({ message: `server error ${e.message}` })
+    }
+}
+
+export const CancelHealthInsurence = async (req: ExtendedRequset, res: Response) => {
+    const { _id } = req.user;
+
+    try {
+        const user = await User.findById(_id);
+        if (!user) {
+            return res.status(404).json({ message: `user not found` });
+        }
+
+        user.status.health = 'none';
+        await user.save()
+
+        res.status(200).json({ message: "success" })
+    } catch (e) {
+        return res.status(500).json({ message: `server error ${e.message}` })
+    }
+}
+

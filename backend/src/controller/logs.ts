@@ -6,7 +6,7 @@ import User from "../model/user";
 
 export const GetAllLogs = async (req: Request, res: Response) => {
     try {
-        const logs = await Logs.find();
+        const logs = await Logs.find().lean();
 
         if (logs.length === 0) {
             return res.status(200).json({ message: 'no log found' });
@@ -19,16 +19,14 @@ export const GetAllLogs = async (req: Request, res: Response) => {
 }
 
 export const GetLogs = async (req: ExtendedRequset, res: Response) => {
-    const { _id, aadhar } = req.user;
+    const { _id } = req.user;
 
     try {
-        const user = await User.findById(_id);
-        console.log(user.name)
+        const user = await User.findById(_id).select('wallet.address').lean();
         if (!user) {
             return res.status(404).json({ message: `user not found` })
         }
-
-        const logs = await Logs.find({ from: user.wallet.address });
+        const logs = await Logs.find({ from: user.wallet.address }).sort({ time: 1 }).limit(25).lean();
         if (logs.length === 0) {
             return res.status(200).json({ message: `no log found` });
         }

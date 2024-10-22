@@ -1,22 +1,30 @@
 import axios from "axios";
 import { EndPoint } from "@/constants/apiEndPoint";
+import { useState, useContext } from "react";
 import { Text, View, Image, StyleSheet } from "react-native";
 import { ThemedButton } from "../Button";
-import React, { useState, forwardRef } from "react";
+import { UserInfoContext } from "@/app/(tab)/_layout";
 import { useHeader } from "@/hooks/useHeader";
 
-export const Health_Insurence = (ref: any) => {
+interface hi {
+  closePanal: () => void
+}
+export const Health_Insurence = ({ closePanal }: hi) => {
+  const { userData, fetchUserInfo } = useContext<any>(UserInfoContext);
   const headers = useHeader();
-  const [isRedeemed, setIsRedeemed] = useState(false);
   const [confirm, setConfirm] = useState<boolean>(true);
 
   const onPress = async () => {
     setConfirm(false);
     try {
       const response = await axios.get(`${EndPoint}/healthInsurence`, { headers });
-      if (response.status === 200) {
-        console.log(response.data)
+      if (response.status === 201) {
+        closePanal();
+        fetchUserInfo()
         setConfirm(true)
+      } else if (response.status === 200) {
+        closePanal();
+        fetchUserInfo()
       }
     } catch (e) {
       console.log(`error from server ${e}`);
@@ -30,7 +38,7 @@ export const Health_Insurence = (ref: any) => {
       <Text style={styles.text}>
         Health insurance provides financial protection in case of medical emergencies. It covers expenses related to hospitalization, treatments, and surgeries, ensuring you can access the best care without worrying about the costs. Apply now to secure coverage for you and your family.
       </Text>
-      {!isRedeemed ? (
+      {userData.status.health === 'none' ? (
         <ThemedButton style={styles.btn} onPress={onPress} placeholder="Apply Now!" state={confirm} />
       ) : (
         <Text style={styles.activatedText}>Already Activated</Text>
@@ -60,7 +68,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   activatedText: {
-    fontSize: 16,
+    fontSize: 32,
     color: 'green',
     marginTop: 10,
   }

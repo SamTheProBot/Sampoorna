@@ -1,6 +1,6 @@
 
 import { PropsWithChildren } from 'react';
-import { StyleSheet, useColorScheme, View, Text, Image } from 'react-native';
+import { StyleSheet, View, Text, Image, ImageBackground } from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedRef,
@@ -42,28 +42,30 @@ export default function ParallaxScrollHome({
 
   return (
     <ThemedView style={styles.container}>
-      <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16}>
+      <Animated.ScrollView ref={scrollRef} showsVerticalScrollIndicator={false} scrollEventThrottle={16}>
         <Animated.View
           style={[
             styles.header,
             { backgroundColor: 'darkorange' },
             headerAnimatedStyle,
           ]}>
-          <View style={styles.upper}>
-            <View style={styles.userInfoContainer}>
-              <Image source={require("@/assets/images/user.jpg")} style={styles.userImage} />
-              <View>
-                <Text style={styles.nameText}>{userInfo.name}</Text>
-                <Text style={styles.detailText}>{userInfo.name}</Text>
+          <ImageBackground style={StyleSheet.absoluteFill} source={require('@/assets/images/home.png')}>
+            <View style={styles.upper}>
+              <View style={styles.userInfoContainer}>
+                <Image source={require("@/assets/images/user.jpg")} style={styles.userImage} />
+                <View>
+                  <Text style={styles.nameText}>{userInfo.name}</Text>
+                  <Text style={styles.detailText}>name</Text>
+                </View>
               </View>
             </View>
-          </View>
-          <View style={styles.lower}>
-            <View>
-              <Text style={styles.balanceText}>{userInfo.balance} EST</Text>
-              <Text style={styles.balanceLabel}>Your Balance</Text>
+            <View style={styles.lower}>
+              <View>
+                <Text style={styles.balanceText}>{parseFloat(userInfo.balance).toFixed(2)} EST</Text>
+                <Text style={styles.balanceLabel}>Your Balance</Text>
+              </View>
             </View>
-          </View>
+          </ImageBackground>
         </Animated.View>
         <ThemedView style={styles.content}>{children}</ThemedView>
       </Animated.ScrollView>
@@ -86,7 +88,8 @@ const styles = StyleSheet.create({
     borderTopEndRadius: 20,
     marginTop: -20,
     flex: 1,
-    padding: 32,
+    paddingHorizontal: 12,
+    paddingVertical: 28,
     gap: 16,
     overflow: 'hidden',
   },
@@ -111,9 +114,9 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   userImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 68,
+    height: 68,
+    borderRadius: 25,
     marginRight: 20,
   },
   nameText: {
@@ -134,6 +137,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'white',
     marginTop: 4,
+    textAlign: 'right'
   },
   text: {
     fontSize: 45,
