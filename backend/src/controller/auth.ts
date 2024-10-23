@@ -74,17 +74,17 @@ export const Userlogin = async (req: Request, res: Response) => {
     }
     const genCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    //await client.messages
-    //  .create({
-    //    body: `${genCode}`,
-    //    from: '+14053515799',
-    //    to: `+91${contact}`
-    //  })
-    //
-    //   await Verification.create({
-    //     contact: contact,
-    //     code: genCode,
-    //   })
+    await client.messages
+      .create({
+        body: `${genCode}`,
+        from: '+14053515799',
+        to: `+91${contact}`
+      })
+    
+       await Verification.create({
+         contact: contact,
+         code: genCode,
+       })
 
     return res
       .status(200)
@@ -101,8 +101,8 @@ export const Verify = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'please provide contact and code' });
   }
   try {
-    //   const verify = await Verification.findOne({ contact: contact });
-    //   if (verify && verify.code === code) {
+      const verify = await Verification.findOne({ contact: contact });
+       if (verify && verify.code === code) {
     const user = await User.findOne({ contact: contact });
     if (!user) {
       return res.status(404).json({ message: `user not found` });
@@ -111,12 +111,12 @@ export const Verify = async (req: Request, res: Response) => {
       { contact: contact, _id: user._id },
       process.env.JWT_TOKEN as string
     );
-    // await Verification.deleteOne({ contact: contact })
+     await Verification.deleteOne({ contact: contact })
     console.log('user logined succesfully');
     return res.status(200).json({ message: `login successful`, access_token: access_token });
-    //   } else {
+      } else {
     return res.status(400).json({ error: 'invalid code or contact' });
-    //   }
+     }
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
